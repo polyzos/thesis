@@ -15,7 +15,10 @@ object RetweetHandlerActor {
   case class FetchRetweets(id: Long)
 }
 
-class RetweetHandlerActor(tweetID: Long) extends Actor with ActorLogging {
+class RetweetHandlerActor(tweetID: Long) extends Actor
+  with ActorLogging
+  with Utilities {
+
   private val client = TwitterRestClient()
 
   import RetweetHandlerActor._
@@ -40,7 +43,7 @@ class RetweetHandlerActor(tweetID: Long) extends Actor with ActorLogging {
     client.retweets(id = id) onComplete {
       case Success(result) =>
         log.info(s"Fetched '${result.data.size}' retweets for tweet $id.")
-        Utilities.saveToDisk(result.data.toList)(context.system)
+        saveToDisk(result.data.toList, "retweets_batch.json")(context.system)
         self ! Terminate
       case Failure(exception) => exception.printStackTrace()
     }

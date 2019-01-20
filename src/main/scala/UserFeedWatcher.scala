@@ -1,11 +1,10 @@
-import actors.{SampleStreamListenerActor, StreamListenerActor}
+import actors.StreamListenerActor
 import akka.actor.ActorSystem
-import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
-import utils.Utilities
+import com.danielasfregola.twitter4s.TwitterRestClient
 
 import scala.concurrent.Await
 
-object MonitorUserFeed extends Utilities {
+object UserFeedWatcher {
 
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem = ActorSystem("tweet-crawler")
@@ -17,6 +16,5 @@ object MonitorUserFeed extends Utilities {
     val futureResult = Await.result(user, 5000 seconds)
 
     system.actorOf(StreamListenerActor.props(Seq(futureResult.data.id)),s"the-onion-stream-listener")
-
   }
 }
