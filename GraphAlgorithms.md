@@ -1,4 +1,4 @@
-1. PathFinding & Graph Search Algorithms: 
+#### 1. PathFinding & Graph Search Algorithms: 
 
 | Algorithm Type | What It Does | Example Uses | Spark | Neo4J |
 | --- | --- | --- | --- | --- | 
@@ -11,7 +11,7 @@
 | `Random Walk` | Returns a list of nodes along a path of specified size by randomly choosing relationships to traverse.|Augment training for machine learning or data for graph algorithms | ✗ | ✓|
 
 
-2. Centrality Algorithms:
+#### 2. Centrality Algorithms:
 
 | Algorithm Type | What It Does | Example Uses | Spark | Neo4J |
 | --- | --- | --- | --- | --- | 
@@ -20,7 +20,7 @@
 | `Betweenness Centrality Variation: Randomized- Approximate Brandes`| Measures the number of shortest paths that pass through a node. | Improve drug targeting by finding the control genes for specific diseases. | ✗ | ✓ | 
 | `PageRank - Variation: Personalized PageRank`| Estimates a current node’s importance from its linked neighbors and their neighbors. Popularized by Google | Find the most influential features for extraction in machine learning and rank text for entity relevance in natural language processing. | ✓ | ✓ | 
 
-3. Community Detection Algorithms:
+#### 3. Community Detection Algorithms:
 
 | Algorithm Type | What It Does | Example Uses | Spark | Neo4J |
 | --- | --- | --- | --- | --- | 
