@@ -11,6 +11,7 @@ import akka.stream.{ActorMaterializer, IOResult}
 import akka.util.ByteString
 import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken, Tweet}
 import com.typesafe.config.ConfigFactory
+import models.ParsedTweet
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization.write
 import org.json4s.{Formats, NoTypeHints}
@@ -22,9 +23,9 @@ import scala.util.Random
 trait Utilities {
 
   private val logger = LoggerFactory.getLogger(getClass)
-  private val outputDir = new File(String.valueOf(System.getProperty("user.home") + "/Desktop/tweets"));
+  private val outputDir = new File(String.valueOf(System.getProperty("user.home") + "/tweets"));
 
-  def saveToDisk(tweets: List[Tweet], filename: String)(implicit system: ActorSystem): Unit = {
+  def saveToDisk(tweets: List[ParsedTweet], filename: String)(implicit system: ActorSystem): Unit = {
     import java.nio.file.StandardOpenOption._
 
     if (!outputDir.exists()) outputDir.mkdir()
@@ -32,10 +33,10 @@ trait Utilities {
     implicit val ec: ExecutionContextExecutor = system.dispatcher
     implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-    val source: Source[Tweet, NotUsed] = Source(tweets)
+    val source: Source[ParsedTweet, NotUsed] = Source(tweets)
 
-    val serialize: Flow[Tweet, ByteString, NotUsed] =
-      Flow[Tweet].map { t =>
+    val serialize: Flow[ParsedTweet, ByteString, NotUsed] =
+      Flow[ParsedTweet].map { t =>
         implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints)
         ByteString(write(t) + "\n")
       }
@@ -53,8 +54,8 @@ trait Utilities {
     }
   }
 
-  def checkForNewPost(tweet: Tweet)(context: ActorContext): Unit = {
-    if (tweet.retweeted_status.isDefined && !tweet.text.startsWith("RT")) {
+  def checkForNewPost(tweet: ParsedTweet)(context: ActorContext): Unit = {
+    if (tweet.retweeted_status.isDefined && tweet.text.startsWith("RT")) {
       context.actorOf(RetweetHandlerActor.props(
         tweet.retweeted_status.get.id),
         s"retweet_fetcher_${Random.nextInt()}")
@@ -73,5 +74,23 @@ trait Utilities {
     val consumerToken = ConsumerToken(key = consumerKey, secret = consumerSecret)
 
     (consumerToken, accessToken)
+  }
+
+  def parseTweetHandler(tweet: Tweet): ParsedTweet = {
+    ParsedTweet(tweet.created_at,
+      tweet.current_user_retweet,
+      tweet.favorite_count,
+      tweet.id,
+      tweet.in_reply_to_screen_name,
+      tweet.in_reply_to_status_id,
+      tweet.in_reply_to_user_id,
+      tweet.lang,
+      tweet.retweet_count,
+      tweet.retweeted,
+      tweet.retweeted_status,
+      tweet.source,
+      tweet.text,
+      tweet.user
+    )
   }
 }

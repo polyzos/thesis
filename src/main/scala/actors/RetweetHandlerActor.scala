@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
 import com.danielasfregola.twitter4s.TwitterRestClient
 import utils.Utilities
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.util.{Failure, Success}
 
 
@@ -40,12 +40,14 @@ class RetweetHandlerActor(tweetID: Long) extends Actor
   }
 
   private def retrieveRetweets(id: Long): Unit = {
+    implicit val ec: ExecutionContextExecutor = ExecutionContext.global
     client.retweets(id = id) onComplete {
       case Success(result) =>
         log.info(s"Fetched '${result.data.size}' retweets for tweet $id.")
-        saveToDisk(result.data.toList, "retweets_batch.json")(context.system)
+        val retweets = result.data.map(parseTweetHandler).toList
+        saveToDisk(retweets, "retweets_batch.json")(context.system)
         self ! Terminate
-      case Failure(exception) => exception.printStackTrace()
+      case Failure(exception) => log.error("Failed to retrieve retweets for '$id': ", exception.printStackTrace())
     }
   }
 }

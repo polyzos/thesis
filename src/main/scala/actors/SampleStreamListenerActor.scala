@@ -5,6 +5,7 @@ import com.danielasfregola.twitter4s.TwitterStreamingClient
 import com.danielasfregola.twitter4s.entities.Tweet
 import com.danielasfregola.twitter4s.entities.enums.Language
 import com.danielasfregola.twitter4s.entities.streaming.StreamingMessage
+import models.ParsedTweet
 import utils.Utilities
 
 object SampleStreamListenerActor {
@@ -19,7 +20,7 @@ class SampleStreamListenerActor(followersCountThreshold: Int, streamingClient: T
   with ActorLogging
   with Utilities {
 
-  private var sampleStreamCache = scala.collection.mutable.ListBuffer.empty[Tweet]
+  private var sampleStreamCache = scala.collection.mutable.ListBuffer.empty[ParsedTweet]
 
   import SampleStreamListenerActor._
 
@@ -37,6 +38,7 @@ class SampleStreamListenerActor(followersCountThreshold: Int, streamingClient: T
 
   private def sampleTweetHandler: PartialFunction[StreamingMessage, Unit] = {
     case tweet: Tweet =>
+      val parsedTweet = parseTweetHandler(tweet)
       if (tweet.user.get.followers_count > followersCountThreshold) {
         log.info(s"Received tweet: ${tweet.text.toString}")
         if (sampleStreamCache.size > 200) {
@@ -44,8 +46,8 @@ class SampleStreamListenerActor(followersCountThreshold: Int, streamingClient: T
           saveToDisk(sampleStreamCache.toList, "sample_tweets_stream.json")(context.system)
           sampleStreamCache.clear()
         }
-        sampleStreamCache += tweet
-        checkForNewPost(tweet)(context)
+        sampleStreamCache += parsedTweet
+        checkForNewPost(parsedTweet)(context)
       }
     case _ =>
       log.info("Unknown object received from twitter stream.")

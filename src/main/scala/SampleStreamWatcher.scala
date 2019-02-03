@@ -5,7 +5,7 @@ import utils.Utilities
 
 object SampleStreamWatcher extends Utilities {
 
-  def main(args: Array[String]): Unit = {
+  def startSampleStreamWatcher(): Unit= {
     implicit val system: ActorSystem = ActorSystem("tweet-crawler")
 
     val tokens = credentialsParser("twitter-2")
