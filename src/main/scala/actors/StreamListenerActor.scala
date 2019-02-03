@@ -53,9 +53,6 @@ class StreamListenerActor(ids: Seq[Long]) extends Actor
   private def cacheTweet: PartialFunction[StreamingMessage, Unit] = {
     case tweet: Tweet =>
       log.info(s"Received tweet: ${tweet.text.toString}")
-      log.info(tweet.retweeted_status.toString)
-      log.info(tweet.retweeted_status.isDefined.toString)
-      log.info(tweet.text.startsWith("RT").toString)
       val parsedTweet = parseTweetHandler(tweet)
       if (streamCache.size > 20) {
         log.info(s"Total tweets in cache '${streamCache.size}' - saving data to disk.")

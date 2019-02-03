@@ -11,6 +11,6 @@ object SampleStreamWatcher extends Utilities {
     val tokens = credentialsParser("twitter-2")
     val streamingClient = new TwitterStreamingClient(tokens._1, tokens._2)
 
-    system.actorOf(SampleStreamListenerActor.props(1000, streamingClient = streamingClient),"sample-stream-listener")
+    system.actorOf(SampleStreamListenerActor.props( streamingClient = streamingClient),"sample-stream-listener")
   }
 }

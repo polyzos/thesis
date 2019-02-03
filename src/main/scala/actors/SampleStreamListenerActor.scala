@@ -41,13 +41,12 @@ class SampleStreamListenerActor(followersCountThreshold: Int, streamingClient: T
       val parsedTweet = parseTweetHandler(tweet)
       if (tweet.user.get.followers_count > followersCountThreshold) {
         log.info(s"Received tweet: ${tweet.text.toString}")
-        if (sampleStreamCache.size > 200) {
+        if (sampleStreamCache.size > 100) {
           log.info(s"Total tweets in cache '${sampleStreamCache.size}' - saving data to disk.")
           saveToDisk(sampleStreamCache.toList, "sample_tweets_stream.json")(context.system)
           sampleStreamCache.clear()
         }
         sampleStreamCache += parsedTweet
-        checkForNewPost(parsedTweet)(context)
       }
     case _ =>
       log.info("Unknown object received from twitter stream.")
