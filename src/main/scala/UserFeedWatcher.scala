@@ -29,7 +29,7 @@ object UserFeedWatcher {
     val tokens = credentialsParser("twitter-2")
     val streamingClient = new TwitterStreamingClient(tokens._1, tokens._2)
 
-    system.actorOf(SampleStreamListenerActor.props(1000, streamingClient = streamingClient),"sample-stream-listener")
+    system.actorOf(SampleStreamListenerActor.props(streamingClient = streamingClient),"sample-stream-listener")
   }
 
   private def fetchTwitterIds(account: String, client: TwitterRestClient)(implicit system: ActorSystem): Long = {
