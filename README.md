@@ -1,6 +1,6 @@
 ### Measure The Speed Of News Spread in Social Networks For Real-Time Fake News Detection
 
-### Requirements:
+###       Requirements:
 
 - [ ] Data Collection (to be reimplemented in Kotlin)                   
 - [ ] Data Wrangling & Preprocessing - Spark and Kotlin  (Giannis)            
