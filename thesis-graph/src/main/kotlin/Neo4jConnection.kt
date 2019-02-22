@@ -4,8 +4,8 @@ import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Values.parameters
 
 class Neo4jConnection(uri: String,
-                      user: String,
-                      password: String): AutoCloseable {
+                      user: String? = null,
+                      password: String? = null): AutoCloseable {
     private val driver: Driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password))
 
     fun createUserNode(id: Long, screenName: String) {
@@ -17,6 +17,24 @@ class Neo4jConnection(uri: String,
                             MERGE (u: User {screen_name:'$screenName',id : '$id'})
                             RETURN u.id""",
                         parameters("id", id, "screen_name", screenName))
+                        .single().get(0).asString()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn: $e")
+        }
+    }
+
+    fun createFollowsRelationship(follower: String, followee: String) {
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (follower: User {screen_name: '$follower'})
+                            MATCH (followee: User {screen_name: '$followee'})
+                            MERGE (follower)-[:FOLLOWS]->(followee)
+                            RETURN follower.screen_name, followee.screen_name""",
+                        parameters("screen_name", follower))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
@@ -40,7 +58,7 @@ class Neo4jConnection(uri: String,
         }
     }
 
-    fun createTweetedRelationShip(screenName: String, id: Long) {
+    fun createTweetedRelationship(screenName: String, id: Long) {
         try {
             driver.session()
                 .writeTransaction {
@@ -58,7 +76,7 @@ class Neo4jConnection(uri: String,
         }
     }
 
-    fun createRetweetedFromRelationShip(tweetId: Long, retweetId: Long) {
+    fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long) {
         try {
             driver.session()
                 .writeTransaction {
@@ -77,7 +95,7 @@ class Neo4jConnection(uri: String,
         }
     }
 
-    fun createReTweetedRelationShip(screenName: String, id: Long) {
+    fun createRetweetedRelationship(screenName: String, id: Long) {
         try {
             driver.session()
                 .writeTransaction {
