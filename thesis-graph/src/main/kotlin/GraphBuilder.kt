@@ -11,21 +11,30 @@ fun main() {
 
     val post = loadAndCreateTweet(mapper)
     val retweets = loadAndCreateReTweets(mapper)
+    val uri = "bolt://localhost:7687"
 
-    val connection = Neo4jConnection("bolt://localhost:7687",
-        "neo4j",
-        "123456")
+    val connection = Neo4jConnection(uri)
 
-    connection.createUserNode(post.user_id, post.user_screen_name)
-    connection.createPostNode(post.id, "TWEET")
-    connection.createTweetedRelationShip(post.user_screen_name, post.id)
+//    connection.createUserNode(post.user_id, post.user_screen_name)
+//    connection.createPostNode(post.id, "TWEET")
+//    connection.createTweetedRelationship(post.user_screen_name, post.id)
+//
+//    retweets.forEach {
+//        connection.createUserNode(it.id, it.user_screen_name)
+//        connection.createPostNode(it.id, "RETWEET")
+//        connection.createRetweetedFromRelationship(it.id, it.retweet_status.retweet_status_id)
+//        connection.createRetweetedRelationship(it.user_screen_name, it.id)
+//    }
 
-    retweets.forEach {
-        connection.createUserNode(it.id, it.user_screen_name)
-        connection.createPostNode(it.id, "RETWEET")
-        connection.createRetweetedFromRelationShip(it.id, it.retweet_status.retweet_status_id)
-        connection.createReTweetedRelationShip(it.user_screen_name, it.id)
+    val users = loadUsers()
+    var counter: Long = 0;
+    connection.createUserNode(66666, "TheOnion")
+    users.forEach {
+//        connection.createUserNode(counter++, it)
+        connection.createFollowsRelationship(it, "TheOnion")
     }
+
+
 }
 
 fun loadAndCreateTweet(mapper: ObjectMapper): Post {
@@ -42,4 +51,11 @@ fun loadAndCreateReTweets(mapper: ObjectMapper): List<RetweetInfo> {
     File("src/main/resources/post_retweets.json")
         .forEachLine { retweets.add(mapper.readValue(it)) }
     return retweets
+}
+
+fun loadUsers(): List<String> {
+    val users = ArrayList<String>()
+    File("src/main/resources/TheOnion.txt")
+        .forEachLine { users.add(it) }
+    return users
 }
