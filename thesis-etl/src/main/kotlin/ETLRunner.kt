@@ -11,9 +11,7 @@ fun main() {
         .master("local[*]")
         .orCreate
 
-    Utilities.runSparkJob("src/main/resources/tweets/fake_tweets.json", spark)
-    Utilities.runSparkJob("src/main/resources/tweets/sample_tweets_stream.json", spark)
-//    runSparkJob("src/main/resources/tweets/retweets_batch.json", spark, false)
+    Utilities.runSparkJob("../../tweets/fake_tweets.json", spark)
 
     spark.close()
 }

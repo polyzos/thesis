@@ -25,29 +25,56 @@ object Utilities {
         val retweetPosts = extractRetweetPosts(tweetsWithUserFlattened)
         retweetPosts.createOrReplaceTempView("retweet_posts")
 
-        val retweetPostsWithTweet = spark.sql(
-            """
-            SELECT *
-            FROM retweet_posts
-            WHERE retweet_posts.retweeted_status.id IN (SELECT id FROM tweet_posts)
-            """
-        )
-
         val tweetsWithRetweets = spark.sql(
             """
             SELECT *
             FROM tweet_posts
             WHERE id IN (SELECT retweet_posts.retweeted_status.id FROM retweet_posts)
             """
-        )
+        ).drop(
+            "in_reply_to_screen_name",
+            "in_reply_to_status_id",
+            "in_reply_to_user_id",
+            "retweeted_status",
+            "user_verified")
+        tweetsWithRetweets.show()
+
+
+        val retweetPostsWithTweet = spark.sql(
+            """
+            SELECT *
+            FROM retweet_posts
+            WHERE retweet_posts.retweeted_status.id IN (SELECT id FROM tweet_posts)
+            """)
+            .withColumn("retweeted_status_id", functions.col("retweeted_status.id"))
+            .withColumn("retweeted_status_text", functions.col("retweeted_status.text"))
+            .withColumn("retweeted_status_user", functions.col("retweeted_status.user"))
+            .drop(
+                "in_reply_to_screen_name",
+                "in_reply_to_status_id",
+                "in_reply_to_user_id",
+                "retweeted_status",
+                "user_verified"
+            )
+
+        val replies = extractReplyPosts(tweetsWithUserFlattened).drop("retweeted_status", "user_verified")
+        replies
+            .show()
+
+        replies.createOrReplaceTempView("reply_posts")
+        val repliesWithTweets = spark.sql(
+            """
+            SELECT *
+            FROM reply_posts
+            WHERE in_reply_to_status_id IN (SELECT id FROM tweet_posts)
+            """)
+        repliesWithTweets.show()
 
         saveToDisk(tweetsWithRetweets, "tweets.json")
         saveToDisk(retweetPostsWithTweet, "retweets.json")
+        saveToDisk(repliesWithTweets, "replies.json")
 
-        val replies = extractReplyPosts(tweetsWithUserFlattened)
-        saveToDisk(replies, "replies.json")
-
-        println("Found: ${tweetsWithRetweets.count()} tweets, ${retweetPostsWithTweet.count()} retweets and ${replies.count()} replies")
+        println("Found: ${tweetsWithRetweets.count()} tweets, ${retweetPostsWithTweet.count()} retweets and ${repliesWithTweets.count()} replies")
     }
 
     private fun fieldExtractor(data: Dataset<Row>): Dataset<Row> {
