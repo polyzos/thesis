@@ -1,11 +1,16 @@
+import jp.nephy.penicillin.PenicillinClient
+import jp.nephy.penicillin.core.session.config.account
+import jp.nephy.penicillin.core.session.config.application
+import jp.nephy.penicillin.core.session.config.token
 import models.ParsedTweet
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
 import utils.Utilities
+import java.io.File
 
 
-fun main() {
+suspend fun main() {
     Logger.getLogger("org.apache").level = Level.WARN
 
     val spark = SparkSession.builder()
@@ -47,8 +52,8 @@ fun main() {
         ORDER BY total_count DESC
         """).show()
 
-    val tweetUsernames = Utilities.retrieveUsernames(spark)
-        .collectAsList().map { it.getString(0) }
+//    val tweetUsernames = Utilities.retrieveUsernames(spark)
+//        .collectAsList().map { it.getString(0) }
 
     val top25 = Utilities.findTop25Retweets(spark)
 
@@ -61,10 +66,29 @@ fun main() {
 
     val postRetweets = Utilities.findPostRetweets(1099368369780940806, spark)
 
-    tweetsList.forEach {
-        val p = Utilities.findPostRetweets(it.id, spark)
-        println("Tweet ${it.id} has ${p.count()} retweets")
+
+    val client = PenicillinClient {
+        account {
+            application(
+                "EtK6PfV3Tzkl0JdB6MtiQx2A5",
+                "QvbYmhdRzjAjoY7GYMz2UuPouqTJkUV7HzAM3oh6ibPpNF9urV")
+            token(
+                "931176203528097794-nvHdZKfn4y4aV4jKnH37vFzaFzlUnER",
+                "cOolP4cYpsSz0rr8MKZeJ1Yq6hwwb684gDebSb6YIHcpU")
+        }
     }
+    tweetsList.forEach {
+//        val p = Utilities.findPostRetweets(it.id, spark)
+//
+//        println(it.user_screen_name)
+//        println(it.user_followers_count)
+//
+//        println("Tweet ${it.id} has ${p.count()} retweets")
+        println("User ${it.user_screen_name} should have ${it.user_followers_count} followers")
+        Utilities.retrieveFollowersIds(it.user_screen_name, client)
+    }
+
+    client.close()
 
     spark.close()
 }
