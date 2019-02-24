@@ -1,12 +1,15 @@
 package utils
 
 import org.apache.spark.sql.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 object Utilities {
 
     private val fakeTweets = "fake_tweets.json"
     private val retweetsBatch = "retweets_batch.json"
     private val sampleTweetsStream = "sample_tweets_stream.json"
+    private val twitterDateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
     internal fun runSparkJob(pathPrefix: String, spark: SparkSession) {
         val fakeTweetsData = spark.read().format("json")
@@ -95,14 +98,56 @@ object Utilities {
 
 
         val retweetPostsWithTweetMerged = retweetPostsWithTweet.union(moreRetweetsPostsWithTweet).dropDuplicates("id")
-        println("Found: ${tweetsWithRetweets.count()} tweets, ${retweetPostsWithTweetMerged.count()} retweets and ${repliesWithTweets.count()} replies")
+        println("""Found:
+            |   ${tweetsWithRetweets.count()} tweets
+            |    ${retweetPostsWithTweetMerged.count()} retweets
+            |    ${repliesWithTweets.count()} replies""".trimMargin()
+        )
 
         saveToDisk(tweetsWithRetweets, "tweets.json")
         saveToDisk(retweetPostsWithTweetMerged, "retweets.json")
         saveToDisk(repliesWithTweets, "replies.json")
     }
 
+    internal fun removeRetweetsLessThanThreshold(threshold: Int, spark: SparkSession): Dataset<Row> {
+        return spark.sql(
+            """
+                SELECT  COUNT(retweeted_status_id) as total, retweeted_status_id
+                FROM retweets
+                GROUP BY retweeted_status_id
+                HAVING total > $threshold
+                """)
+    }
 
+    internal fun findTop25Retweets(spark: SparkSession): Dataset<Row> {
+        return  spark.sql("""
+            SELECT  COUNT(retweeted_status_id) as total, retweeted_status_id
+            FROM retweets
+            GROUP BY retweeted_status_id
+            ORDER BY total DESC
+            LIMIT 25
+            """)
+    }
+
+    internal fun findPostRetweets(retweetId: Long, spark: SparkSession): Dataset<Row> {
+        return spark.sql(
+            """
+                SELECT *
+                FROM retweets
+                WHERE retweeted_status_id=$retweetId
+                """)
+    }
+
+    internal fun retrieveUsernames(spark: SparkSession): Dataset<Row> {
+        return spark.sql("""
+            SELECT DISTINCT(user_screen_name)
+            FROM tweets
+            """)
+    }
+
+    internal fun parseDate(date: String): Date {
+        return twitterDateFormatter.parse(date.replace("T"," "))
+    }
     private fun extractReTweetPostsFromBatch(data: Dataset<Row>): Dataset<Row>? {
         val dataWithFields = data.select(
             "created_at",
