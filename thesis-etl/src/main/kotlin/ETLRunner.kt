@@ -9,10 +9,10 @@ fun main() {
     val spark = SparkSession.builder()
         .appName("Tweets-Etl")
         .master("local[*]")
+        .config("spark.driver.memory", "4g")
         .orCreate
 
-    Utilities.runSparkJob("../../tweets/fake_tweets.json", spark)
+    Utilities.runSparkJob("../../tweets/", spark)
 
     spark.close()
 }
-
