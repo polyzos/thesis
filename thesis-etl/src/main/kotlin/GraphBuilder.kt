@@ -8,7 +8,7 @@ fun main() {
     Logger.getLogger("org.apache").level = Level.WARN
 
     val spark = SparkSession.builder()
-        .appName("Tweets-Etl")
+        .appName("Graph-Builder")
         .master("local[*]")
         .orCreate
 

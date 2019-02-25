@@ -29,10 +29,6 @@ class RetweetHandlerActor() extends Actor
   override def receive: Receive = {
     case FetchRetweets(id)  =>
       retrieveRetweets(id)
-    case CheckIfNewPost(tweet) =>
-      if (tweet.retweeted_status.isDefined) {
-        self ! FetchRetweets(tweet.retweeted_status.get.id)
-      }
   }
 
   private def retrieveRetweets(id: Long): Unit = {
@@ -42,6 +38,9 @@ class RetweetHandlerActor() extends Actor
         log.info(s"Fetched '${result.data.size}' retweets for tweet $id.")
         val retweets = result.data.toList
         saveToDisk(retweets, "retweets_batch.json")(context.system)
+        log.info(s"Rate Limit Remaining: ${result.rate_limit.remaining}")
+        if (result.rate_limit.remaining == 0) Thread.sleep(60*15 + 5)
+
       case Failure(exception) => log.error("Failed to retrieve retweets for '$id': ", exception.printStackTrace())
     }
   }

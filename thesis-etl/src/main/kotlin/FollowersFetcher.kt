@@ -27,10 +27,10 @@ fun main() {
 
     val config = ConfigurationProperties.fromResource("config.properties")
 
-    val consumerKey = config[Key("consumer.key", stringType)]
-    val consumerSecret= config[Key("consumer.secret", stringType)]
-    val accessToken = config[Key("access.token", stringType)]
-    val accessTokenSecret= config[Key("access.token.secret", stringType)]
+    val consumerKey         = config[Key("consumer.key", stringType)]
+    val consumerSecret      = config[Key("consumer.secret", stringType)]
+    val accessToken         = config[Key("access.token", stringType)]
+    val accessTokenSecret   = config[Key("access.token.secret", stringType)]
 
     val client = PenicillinClient {
         account {
