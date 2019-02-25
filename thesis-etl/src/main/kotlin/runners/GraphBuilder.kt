@@ -1,3 +1,5 @@
+package runners
+
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
@@ -26,7 +28,7 @@ fun main() {
     retweets.createOrReplaceTempView("retweets")
 
     val tweetsList = tweets.collectAsList().map {GraphUtils.rowToParsedTweet(it) }
-    println(tweetsList)
+
     GraphUtils.showPostsCountByUser(spark)
 
     val top25 = GraphUtils.findTop25Retweets(spark)
@@ -42,28 +44,35 @@ fun main() {
 
     val uri = "bolt://localhost:7687"
 
-    val connection = Neo4jConnection(uri)
+    val connection = Neo4jConnection(uri, "neo4j", "12345")
 
-//    connection.createUserNode(post.user_id, post.user_screen_name)
-//    connection.createPostNode(post.id, "TWEET")
-//    connection.createTweetedRelationship(post.user_screen_name, post.id)
-//
-//    retweets.forEach {
-//        connection.createUserNode(it.id, it.user_screen_name)
-//        connection.createPostNode(it.id, "RETWEET")
-//        connection.createRetweetedFromRelationship(it.id, it.retweet_status.retweet_status_id)
-//        connection.createRetweetedRelationship(it.user_screen_name, it.id)
-//    }
+    connection.clearDB()
+
 
     tweetsList.forEach {
         // foreach post find its retweets
         val fetchedRetweets = GraphUtils.findPostRetweets(it.id, spark)
+
         println("Tweet ${it.id} has ${fetchedRetweets.count()} retweets.")
 
-        // TODO: store tweet in the database
+        // Store tweet in the database
+        connection.createUserNode(it.user_id, it.user_screen_name)
+        connection.createPostNode(it.id, "TWEET")
+        connection.createTweetedRelationship(it.user_screen_name, it.id)
 
-        // TODO: store each of its retweets in the database
+        // Store each of its retweets in the database
+        fetchedRetweets.collectAsList()
+            .map { fr -> GraphUtils.rowToParsedRetweet(fr) }
+            .forEach { fr ->
+                connection.createUserNode(fr.user_id, fr.user_screen_name)
+                connection.createPostNode(fr.id, "RETWEET")
+                connection.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id)
+                connection.createRetweetedRelationship(fr.user_screen_name, fr.id)
+        }
     }
 
+    println("Saved records to the database.")
+
+    connection.close()
     spark.close()
 }

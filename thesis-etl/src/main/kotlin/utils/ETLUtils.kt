@@ -205,7 +205,7 @@ object Utilities {
             .write()
             .format("json")
             .mode(mode)
-            .save("src/main/resources/output/$outputPath")
+            .save("src/runners.main/resources/output/$outputPath")
 
     }
 }

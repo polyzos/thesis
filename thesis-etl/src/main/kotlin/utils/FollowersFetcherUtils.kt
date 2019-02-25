@@ -32,7 +32,7 @@ object FollowersFetcherUtils {
     }
 
     private fun saveToFile(data: List<String>, filename: String) {
-        File("src/main/resources/user_followers/$filename").bufferedWriter().use { out ->
+        File("src/runners.main/resources/user_followers/$filename").bufferedWriter().use { out ->
             data.forEach { out.write("$it\n") }
         }
 

@@ -1,3 +1,5 @@
+package runners
+
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession

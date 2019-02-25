@@ -1,3 +1,5 @@
+package runners
+
 import com.natpryce.konfig.ConfigurationProperties
 import com.natpryce.konfig.Key
 import com.natpryce.konfig.stringType

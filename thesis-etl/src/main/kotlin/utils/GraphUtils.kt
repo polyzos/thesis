@@ -1,5 +1,6 @@
 package utils
 
+import models.ParsedReTweet
 import models.ParsedTweet
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
@@ -56,5 +57,23 @@ object GraphUtils {
             row.getLong(4),
             row.getLong(5),
             row.getString(6))
+    }
+
+    internal fun rowToParsedRetweet(row: Row): ParsedReTweet {
+        return ParsedReTweet(
+            Utilities.parseDate(row.getString(0).split(".")[0]),
+            row.getLong(1),
+            row.getLong(2),
+            row.getString(3),
+            row.getLong(4),
+            row.getLong(5),
+            row.getLong(6),
+            row.getString(7),
+            row.getString(8),
+            row.getLong(9),
+            row.getLong(10),
+            row.getLong(11),
+            row.getString(12)
+        )
     }
 }

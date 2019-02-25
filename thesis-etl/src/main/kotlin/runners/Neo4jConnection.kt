@@ -1,3 +1,5 @@
+package runners
+
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.GraphDatabase
@@ -7,6 +9,22 @@ class Neo4jConnection(uri: String,
                       user: String? = null,
                       password: String? = null): AutoCloseable {
     private val driver: Driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password))
+
+    fun clearDB() {
+        println("Deleting all previous records from the database.")
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (n) DETACH DELETE n
+                        """.trimIndent()
+                    )
+                }
+        } catch (e: Throwable) {
+            println("Failed txn: $e")
+        }
+    }
 
     fun createUserNode(id: Long, screenName: String) {
         try {
@@ -48,7 +66,7 @@ class Neo4jConnection(uri: String,
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (p: models.Post {id: '$id', type:'$type'})
+                            MERGE (p: Post {id:'$id', type:'$type'})
                             RETURN p.id""",
                         parameters("id", id, "type", type))
                         .single().get(0).asString()
@@ -63,8 +81,8 @@ class Neo4jConnection(uri: String,
             driver.session()
                 .writeTransaction {
                     it.run( """
-                        MATCH (u:User {screen_name:'$screenName'})
-                        MATCH (p:models.Post {id:'$id'})
+                        MATCH (u: User {screen_name:'$screenName'})
+                        MATCH (p: Post {id:'$id'})
                         MERGE (u)-[:TWEETED]->(p)
                         RETURN u.id, p.id
                         """,
@@ -82,8 +100,8 @@ class Neo4jConnection(uri: String,
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (p1:models.Post {id:'$tweetId'})
-                            MATCH (p2:models.Post {id:'$retweetId'})
+                            MATCH (p1:Post {id:'$tweetId'})
+                            MATCH (p2:Post {id:'$retweetId'})
                             MERGE (p1)-[:RETWEETED_FROM]->(p2)
                             RETURN p1.id, p2.id
                             """,
@@ -102,7 +120,7 @@ class Neo4jConnection(uri: String,
                     it.run(
                         """
                             MATCH (u:User {screen_name:'$screenName'})
-                            MATCH (p:models.Post {id:'$id'})
+                            MATCH (p: Post {id:'$id'})
                             MERGE (u)-[:MADE_RETWEETED]->(p)
                             RETURN u.id, p.id
                             """,
