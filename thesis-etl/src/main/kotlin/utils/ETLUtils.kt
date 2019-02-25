@@ -1,18 +1,6 @@
 package utils
 
-import jp.nephy.penicillin.PenicillinClient
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.session.ApiClient
-import jp.nephy.penicillin.core.session.config.account
-import jp.nephy.penicillin.core.session.config.application
-import jp.nephy.penicillin.core.session.config.token
-import jp.nephy.penicillin.endpoints.followers
-import jp.nephy.penicillin.endpoints.followers.listIdsByScreenName
-import jp.nephy.penicillin.endpoints.followers.listIdsByUserId
-import jp.nephy.penicillin.extensions.cursor.untilLast
-import jp.nephy.penicillin.extensions.rateLimit
 import org.apache.spark.sql.*
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -121,35 +109,6 @@ object Utilities {
         saveToDisk(repliesWithTweets, "replies.json")
     }
 
-    internal fun removeRetweetsLessThanThreshold(threshold: Int, spark: SparkSession): Dataset<Row> {
-        return spark.sql(
-            """
-                SELECT  COUNT(retweeted_status_id) as total, retweeted_status_id
-                FROM retweets
-                GROUP BY retweeted_status_id
-                HAVING total > $threshold
-                """)
-    }
-
-    internal fun findTop25Retweets(spark: SparkSession): Dataset<Row> {
-        return  spark.sql("""
-            SELECT  COUNT(retweeted_status_id) as total, retweeted_status_id
-            FROM retweets
-            GROUP BY retweeted_status_id
-            ORDER BY total DESC
-            LIMIT 25
-            """)
-    }
-
-    internal fun findPostRetweets(retweetId: Long, spark: SparkSession): Dataset<Row> {
-        return spark.sql(
-            """
-                SELECT *
-                FROM retweets
-                WHERE retweeted_status_id=$retweetId
-                """)
-    }
-
     internal fun retrieveUsernames(spark: SparkSession): Dataset<Row> {
         return spark.sql("""
             SELECT DISTINCT(user_screen_name)
@@ -161,34 +120,6 @@ object Utilities {
         return twitterDateFormatter.parse(date.replace("T"," "))
     }
 
-    internal fun retrieveFollowersIds(screenName: String, client: ApiClient) {
-        println("Retrieving followers for user: $screenName")
-        try {
-            val ids =
-                client.followers.listIdsByScreenName(screenName)
-                    .untilLast().fold(emptySequence<Long>()) { acc, nextRes ->
-                        if (nextRes.rateLimit.remaining == 0) {
-                            println("Sleeping for 15 minutes because rate limit exceeded")
-                            Thread.sleep(60 * 15 * 1000 + 500)
-                        }
-                        println(nextRes.result.ids.size)
-                        acc + nextRes.result.ids
-                    }.toList()
-
-            println("Retrieved: ${ids.size} follower's ids for user $screenName\n")
-            saveToFile(ids.map { it.toString() },screenName + ".txt")
-        } catch (e: PenicillinException) {
-            println("Failed because: $e")
-        }
-
-    }
-
-    private fun saveToFile(data: List<String>, filename: String) {
-        File("src/main/resources/user_followers/$filename").bufferedWriter().use { out ->
-            data.forEach {  out.write("$it\n") }
-        }
-
-    }
     private fun extractReTweetPostsFromBatch(data: Dataset<Row>): Dataset<Row>? {
         val dataWithFields = data.select(
             "created_at",

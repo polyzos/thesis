@@ -26,6 +26,8 @@ dependencies {
     compile group: 'org.apache.spark', name: 'spark-core_2.12', version: '2.4.0'
     compile group: 'org.apache.spark', name: 'spark-sql_2.12', version: '2.4.0'
 
+    compile group: 'com.natpryce', name: 'konfig', version: '1.6.10.0'
+
     implementation "jp.nephy:penicillin:4.1.1"
     implementation "io.ktor:ktor-client-cio:1.1.3"
 
