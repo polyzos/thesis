@@ -14,26 +14,31 @@ fun main() {
     val uri = "bolt://localhost:7687"
 
     val connection = Neo4jConnection(uri)
+    val schemaConstraint = SchemaConstraints(uri)
+    val onionId: Long = 14075928
 
-//    connection.createUserNode(post.user_id, post.user_screen_name)
-//    connection.createPostNode(post.id, "TWEET")
-//    connection.createTweetedRelationship(post.user_screen_name, post.id)
-//
-//    retweets.forEach {
-//        connection.createUserNode(it.id, it.user_screen_name)
-//        connection.createPostNode(it.id, "RETWEET")
-//        connection.createRetweetedFromRelationship(it.id, it.retweet_status.retweet_status_id)
-//        connection.createRetweetedRelationship(it.user_screen_name, it.id)
-//    }
+    connection.deleteAll()
+    schemaConstraint.dropAll()
+
+    schemaConstraint.createUserConstraints()
+    schemaConstraint.createTweetConstraints()
+
+    connection.createUserNode(post.user_id, post.user_screen_name)
+    connection.createTweetNode(post.id, "TWEET")
+    connection.createTweetedRelationship(post.user_screen_name, post.id)
+
+    retweets.forEach {
+        connection.createUserNode(it.id, it.user_screen_name)
+        connection.createTweetNode(it.id, "RETWEET")
+        connection.createRetweetedRelationship(it.user_screen_name, it.retweet_status.retweet_status_id)
+    }
 
     val users = loadUsers()
     var counter: Long = 0;
-    connection.createUserNode(66666, "TheOnion")
     users.forEach {
-//        connection.createUserNode(counter++, it)
-        connection.createFollowsRelationship(it, "TheOnion")
+        connection.createUserNode(++counter, it)
+        connection.createFollowsRelationship(counter, onionId)
     }
-
 
 }
 

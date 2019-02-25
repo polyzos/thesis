@@ -14,47 +14,47 @@ class Neo4jConnection(uri: String,
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (u: User {screen_name:'$screenName',id : '$id'})
-                            RETURN u.id""",
+                            MERGE (user: User {screen_name:'$screenName',id : '$id'})
+                            RETURN user""",
                         parameters("id", id, "screen_name", screenName))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createUserNode: $e")
         }
     }
 
-    fun createFollowsRelationship(follower: String, followee: String) {
+    fun createFollowsRelationship(follower: Long, followee: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (follower: User {screen_name: '$follower'})
-                            MATCH (followee: User {screen_name: '$followee'})
+                            MATCH (follower: User {id: '$follower'})
+                            MATCH (followee: User {id: '$followee'})
                             MERGE (follower)-[:FOLLOWS]->(followee)
-                            RETURN follower.screen_name, followee.screen_name""",
-                        parameters("screen_name", follower))
+                            RETURN follower, followee""",
+                        parameters("id", follower, "id", followee))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createFollowsRelationship: $e")
         }
     }
 
-    fun createPostNode(id: Long, type: String) {
+    fun createTweetNode(id: Long, type: String) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (p: models.Post {id: '$id', type:'$type'})
-                            RETURN p.id""",
+                            MERGE (tweet: Tweet {id: '$id', type:'$type'})
+                            RETURN tweet""",
                         parameters("id", id, "type", type))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createTweetNode: $e")
         }
     }
 
@@ -63,35 +63,16 @@ class Neo4jConnection(uri: String,
             driver.session()
                 .writeTransaction {
                     it.run( """
-                        MATCH (u:User {screen_name:'$screenName'})
-                        MATCH (p:models.Post {id:'$id'})
-                        MERGE (u)-[:TWEETED]->(p)
-                        RETURN u.id, p.id
+                        MATCH (user:User {screen_name:'$screenName'})
+                        MATCH (tweet:Tweet {id:'$id'})
+                        MERGE (user)-[:TWEETED]->(tweet)
+                        RETURN user, tweet
                         """,
                         parameters("screen_name", screenName, "id", id))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
-        }
-    }
-
-    fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long) {
-        try {
-            driver.session()
-                .writeTransaction {
-                    it.run(
-                        """
-                            MATCH (p1:models.Post {id:'$tweetId'})
-                            MATCH (p2:models.Post {id:'$retweetId'})
-                            MERGE (p1)-[:RETWEETED_FROM]->(p2)
-                            RETURN p1.id, p2.id
-                            """,
-                        parameters("tweetId", tweetId, "retweetId", retweetId))
-                        .single().get(0).asString()
-                }
-        } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createTweetedRelationship: $e")
         }
     }
 
@@ -101,16 +82,49 @@ class Neo4jConnection(uri: String,
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (u:User {screen_name:'$screenName'})
-                            MATCH (p:models.Post {id:'$id'})
-                            MERGE (u)-[:MADE_RETWEETED]->(p)
-                            RETURN u.id, p.id
+                            MATCH (user:User {screen_name:'$screenName'})
+                            MATCH (tweet:Tweet {id:'$id'})
+                            MERGE (user)-[:RETWEETED]->(tweet)
+                            RETURN user, tweet
                             """,
                         parameters("screen_name", screenName, "id", id))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createRetweetedRelationship: $e")
+        }
+    }
+
+    fun getTweetInfo(id: Long) {
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                       MATCH (tweet:Tweet {id: '$id'})
+                       RETURN tweet
+                       """,
+                    parameters("id", id))
+                    .single().get(0).asString()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getTweetInfo: $e")
+        }
+    }
+
+    fun deleteAll() {
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (n)
+                            DETACH DELETE n
+                        """
+                    )
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in deleteAll: $e")
         }
     }
 
