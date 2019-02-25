@@ -16,7 +16,20 @@ object UserFeedWatcher {
     "redflag_RBLX",
     "DCClothesline",
     "Bipartisanism",
-    "worldnetdaily"
+    "worldnetdaily",
+    "21WIRE",
+    "ActivistPost",
+    "AmericanNewsLLC",
+    "AmplifyingG",
+    "ChristWire",
+    "ChronicleLive",
+    "ClickHole",
+    "conscious_news",
+    "disclosetv",
+    "CRG_CRM",
+    "LibAmericaOrg",
+    "NewsBiscuit",
+    "WorldTruthTV"
   )
 
   def main(args: Array[String]): Unit = {

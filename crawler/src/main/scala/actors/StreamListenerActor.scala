@@ -1,6 +1,6 @@
 package actors
 
-import actors.RetweetHandlerActor.CheckIfNewPost
+import actors.RetweetHandlerActor.{CheckIfNewPost, FetchRetweets}
 import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
 import com.danielasfregola.twitter4s.TwitterStreamingClient
 import com.danielasfregola.twitter4s.entities.Tweet
@@ -27,10 +27,11 @@ class StreamListenerActor(ids: Seq[Long]) extends Actor
 
   private val streamingClient = TwitterStreamingClient()
   private val retweetHandlerActor = context.actorOf(
-                                             RetweetHandlerActor.props,
-                                      s"retweet_fetcher_${Random.nextInt()}")
+    RetweetHandlerActor.props,
+    s"retweet_fetcher_${Random.nextInt()}")
 
   private var streamCache = scala.collection.mutable.ListBuffer.empty[Tweet]
+  private var postsCache = scala.collection.mutable.ListBuffer.empty[Long]
 
   import StreamListenerActor._
 
@@ -57,13 +58,21 @@ class StreamListenerActor(ids: Seq[Long]) extends Actor
 
   private def cacheTweet: PartialFunction[StreamingMessage, Unit] = {
     case tweet: Tweet =>
-      log.info(s"\nReceived tweet: ${tweet.text.toString}")
+      //      log.info(s"\nReceived tweet: ${tweet.text.toString}")
+
+      if (tweet.retweeted_status.isDefined && !postsCache.contains(tweet.retweeted_status.get.id)) {
+        val id = tweet.retweeted_status.get.id
+        postsCache += id
+        retweetHandlerActor ! FetchRetweets(id)
+        if (postsCache.size > 1000) postsCache.clear()
+      }
+
       if (streamCache.size > 20) {
         saveToDisk(streamCache.toList, "fake_tweets.json")(context.system)
         streamCache.clear()
       }
       streamCache += tweet
-      retweetHandlerActor ! CheckIfNewPost(tweet)
+    //      retweetHandlerActor ! CheckIfNewPost(tweet)
     case _ =>
       log.info("Unknown object received from twitter stream.")
   }
