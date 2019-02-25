@@ -23,22 +23,36 @@ fun main() {
     schemaConstraint.createUserConstraints()
     schemaConstraint.createTweetConstraints()
 
-    connection.createUserNode(post.user_id, post.user_screen_name)
-    connection.createTweetNode(post.id, "TWEET")
-    connection.createTweetedRelationship(post.user_screen_name, post.id)
+//    connection.createUserNode(post.user_id, post.user_screen_name)
+//    connection.createTweetNode(post.id, "TWEET")
+//    connection.createTweetedRelationship(post.user_screen_name, post.id)
+//
+//    retweets.forEach {
+//        connection.createUserNode(it.id, it.user_screen_name)
+//        connection.createTweetNode(it.id, "RETWEET")
+//        connection.createRetweetedRelationship(it.user_screen_name, it.retweet_status.retweet_status_id)
+//    }
+//
+//    val users = loadUsers()
+//    var counter: Long = 0;
+//    users.forEach {
+//        connection.createUserNode(++counter, it)
+//        connection.createFollowsRelationship(counter, onionId)
+//    }
 
-    retweets.forEach {
-        connection.createUserNode(it.id, it.user_screen_name)
-        connection.createTweetNode(it.id, "RETWEET")
-        connection.createRetweetedRelationship(it.user_screen_name, it.retweet_status.retweet_status_id)
-    }
+    connection.createUserNode(23145, "J. Cole")
+    connection.createUserNode(214354, "Logic")
+    connection.createUserNode(12453, "Eminem")
+    connection.createFollowsRelationship(23145, 12453)
+    connection.createFollowsRelationship(214354, 12453)
+    connection.createFollowsRelationship(12453, 214354)
 
-    val users = loadUsers()
-    var counter: Long = 0;
-    users.forEach {
-        connection.createUserNode(++counter, it)
-        connection.createFollowsRelationship(counter, onionId)
-    }
+    connection.createTweetNode(12345, "Wet Dreamz")
+    connection.createTweetedRelationship(23145, 12345)
+
+    connection.createTweetNode(65432, "Everyday")
+    connection.createTweetedRelationship(214354, 65432)
+    connection.createRetweetedRelationship(12453, 65432)
 
 }
 

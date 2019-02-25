@@ -15,7 +15,7 @@ class Neo4jConnection(uri: String,
                     it.run(
                         """
                             MERGE (user: User {screen_name:'$screenName',id : '$id'})
-                            RETURN user""",
+                            RETURN user.id""",
                         parameters("id", id, "screen_name", screenName))
                         .single().get(0).asString()
                 }
@@ -33,7 +33,7 @@ class Neo4jConnection(uri: String,
                             MATCH (follower: User {id: '$follower'})
                             MATCH (followee: User {id: '$followee'})
                             MERGE (follower)-[:FOLLOWS]->(followee)
-                            RETURN follower, followee""",
+                            RETURN follower.id, followee.id""",
                         parameters("id", follower, "id", followee))
                         .single().get(0).asString()
                 }
@@ -49,7 +49,7 @@ class Neo4jConnection(uri: String,
                     it.run(
                         """
                             MERGE (tweet: Tweet {id: '$id', type:'$type'})
-                            RETURN tweet""",
+                            RETURN tweet.id""",
                         parameters("id", id, "type", type))
                         .single().get(0).asString()
                 }
@@ -58,17 +58,17 @@ class Neo4jConnection(uri: String,
         }
     }
 
-    fun createTweetedRelationship(screenName: String, id: Long) {
+    fun createTweetedRelationship(userid: Long, tweetid: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run( """
-                        MATCH (user:User {screen_name:'$screenName'})
-                        MATCH (tweet:Tweet {id:'$id'})
+                        MATCH (user:User {id:'$userid'})
+                        MATCH (tweet:Tweet {id:'$tweetid'})
                         MERGE (user)-[:TWEETED]->(tweet)
-                        RETURN user, tweet
+                        RETURN user.id, tweet.id
                         """,
-                        parameters("screen_name", screenName, "id", id))
+                        parameters("id", userid, "id", tweetid))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
@@ -76,18 +76,18 @@ class Neo4jConnection(uri: String,
         }
     }
 
-    fun createRetweetedRelationship(screenName: String, id: Long) {
+    fun createRetweetedRelationship(userid: Long, tweetid: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (user:User {screen_name:'$screenName'})
-                            MATCH (tweet:Tweet {id:'$id'})
+                            MATCH (user:User {id:'$userid'})
+                            MATCH (tweet:Tweet {id:'$tweetid'})
                             MERGE (user)-[:RETWEETED]->(tweet)
-                            RETURN user, tweet
+                            RETURN user.id, tweet.id
                             """,
-                        parameters("screen_name", screenName, "id", id))
+                        parameters("id", userid, "id", tweetid))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
@@ -102,7 +102,7 @@ class Neo4jConnection(uri: String,
                     it.run(
                         """
                        MATCH (tweet:Tweet {id: '$id'})
-                       RETURN tweet
+                       RETURN tweet.id
                        """,
                     parameters("id", id))
                     .single().get(0).asString()
@@ -114,6 +114,7 @@ class Neo4jConnection(uri: String,
 
     fun deleteAll() {
         try {
+            println("Dropping all data from the database.")
             driver.session()
                 .writeTransaction {
                     it.run(
