@@ -40,6 +40,21 @@ fun main() {
 
     val postRetweets = GraphUtils.findPostRetweets(1099368369780940806, spark)
 
+    val uri = "bolt://localhost:7687"
+
+    val connection = Neo4jConnection(uri)
+
+//    connection.createUserNode(post.user_id, post.user_screen_name)
+//    connection.createPostNode(post.id, "TWEET")
+//    connection.createTweetedRelationship(post.user_screen_name, post.id)
+//
+//    retweets.forEach {
+//        connection.createUserNode(it.id, it.user_screen_name)
+//        connection.createPostNode(it.id, "RETWEET")
+//        connection.createRetweetedFromRelationship(it.id, it.retweet_status.retweet_status_id)
+//        connection.createRetweetedRelationship(it.user_screen_name, it.id)
+//    }
+
     tweetsList.forEach {
         // foreach post find its retweets
         val fetchedRetweets = GraphUtils.findPostRetweets(it.id, spark)
