@@ -14,103 +14,118 @@ class Neo4jConnection(uri: String,
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (u: User {screen_name:'$screenName',id : '$id'})
-                            RETURN u.id""",
+                            MERGE (user: User {screen_name:'$screenName',id : '$id'})
+                            RETURN user.id""",
                         parameters("id", id, "screen_name", screenName))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createUserNode: $e")
         }
     }
 
-    fun createFollowsRelationship(follower: String, followee: String) {
+    fun createFollowsRelationship(follower: Long, followee: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (follower: User {screen_name: '$follower'})
-                            MATCH (followee: User {screen_name: '$followee'})
+                            MATCH (follower: User {id: '$follower'})
+                            MATCH (followee: User {id: '$followee'})
                             MERGE (follower)-[:FOLLOWS]->(followee)
-                            RETURN follower.screen_name, followee.screen_name""",
-                        parameters("screen_name", follower))
+                            RETURN follower.id, followee.id""",
+                        parameters("id", follower, "id", followee))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createFollowsRelationship: $e")
         }
     }
 
-    fun createPostNode(id: Long, type: String) {
+    fun createTweetNode(id: Long, type: String) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (p: models.Post {id: '$id', type:'$type'})
-                            RETURN p.id""",
+                            MERGE (tweet: Tweet {id: '$id', type:'$type'})
+                            RETURN tweet.id""",
                         parameters("id", id, "type", type))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createTweetNode: $e")
         }
     }
 
-    fun createTweetedRelationship(screenName: String, id: Long) {
+    fun createTweetedRelationship(userid: Long, tweetid: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run( """
-                        MATCH (u:User {screen_name:'$screenName'})
-                        MATCH (p:models.Post {id:'$id'})
-                        MERGE (u)-[:TWEETED]->(p)
-                        RETURN u.id, p.id
+                        MATCH (user:User {id:'$userid'})
+                        MATCH (tweet:Tweet {id:'$tweetid'})
+                        MERGE (user)-[:TWEETED]->(tweet)
+                        RETURN user.id, tweet.id
                         """,
-                        parameters("screen_name", screenName, "id", id))
+                        parameters("id", userid, "id", tweetid))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createTweetedRelationship: $e")
         }
     }
 
-    fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long) {
+    fun createRetweetedRelationship(userid: Long, tweetid: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (p1:models.Post {id:'$tweetId'})
-                            MATCH (p2:models.Post {id:'$retweetId'})
-                            MERGE (p1)-[:RETWEETED_FROM]->(p2)
-                            RETURN p1.id, p2.id
+                            MATCH (user:User {id:'$userid'})
+                            MATCH (tweet:Tweet {id:'$tweetid'})
+                            MERGE (user)-[:RETWEETED]->(tweet)
+                            RETURN user.id, tweet.id
                             """,
-                        parameters("tweetId", tweetId, "retweetId", retweetId))
+                        parameters("id", userid, "id", tweetid))
                         .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in createRetweetedRelationship: $e")
         }
     }
 
-    fun createRetweetedRelationship(screenName: String, id: Long) {
+    fun getTweetInfo(id: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (u:User {screen_name:'$screenName'})
-                            MATCH (p:models.Post {id:'$id'})
-                            MERGE (u)-[:MADE_RETWEETED]->(p)
-                            RETURN u.id, p.id
-                            """,
-                        parameters("screen_name", screenName, "id", id))
-                        .single().get(0).asString()
+                       MATCH (tweet:Tweet {id: '$id'})
+                       RETURN tweet.id
+                       """,
+                    parameters("id", id))
+                    .single().get(0).asString()
                 }
         } catch (e: Throwable) {
-            println("Failed txn: $e")
+            println("Failed txn in getTweetInfo: $e")
+        }
+    }
+
+    fun deleteAll() {
+        try {
+            println("Dropping all data from the database.")
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (n)
+                            DETACH DELETE n
+                        """
+                    )
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in deleteAll: $e")
         }
     }
 

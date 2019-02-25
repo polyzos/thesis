@@ -14,26 +14,45 @@ fun main() {
     val uri = "bolt://localhost:7687"
 
     val connection = Neo4jConnection(uri)
+    val schemaConstraint = SchemaConstraints(uri)
+    val onionId: Long = 14075928
+
+    connection.deleteAll()
+    schemaConstraint.dropAll()
+
+    schemaConstraint.createUserConstraints()
+    schemaConstraint.createTweetConstraints()
 
 //    connection.createUserNode(post.user_id, post.user_screen_name)
-//    connection.createPostNode(post.id, "TWEET")
+//    connection.createTweetNode(post.id, "TWEET")
 //    connection.createTweetedRelationship(post.user_screen_name, post.id)
 //
 //    retweets.forEach {
 //        connection.createUserNode(it.id, it.user_screen_name)
-//        connection.createPostNode(it.id, "RETWEET")
-//        connection.createRetweetedFromRelationship(it.id, it.retweet_status.retweet_status_id)
-//        connection.createRetweetedRelationship(it.user_screen_name, it.id)
+//        connection.createTweetNode(it.id, "RETWEET")
+//        connection.createRetweetedRelationship(it.user_screen_name, it.retweet_status.retweet_status_id)
+//    }
+//
+//    val users = loadUsers()
+//    var counter: Long = 0;
+//    users.forEach {
+//        connection.createUserNode(++counter, it)
+//        connection.createFollowsRelationship(counter, onionId)
 //    }
 
-    val users = loadUsers()
-    var counter: Long = 0;
-    connection.createUserNode(66666, "TheOnion")
-    users.forEach {
-//        connection.createUserNode(counter++, it)
-        connection.createFollowsRelationship(it, "TheOnion")
-    }
+    connection.createUserNode(23145, "J. Cole")
+    connection.createUserNode(214354, "Logic")
+    connection.createUserNode(12453, "Eminem")
+    connection.createFollowsRelationship(23145, 12453)
+    connection.createFollowsRelationship(214354, 12453)
+    connection.createFollowsRelationship(12453, 214354)
 
+    connection.createTweetNode(12345, "Wet Dreamz")
+    connection.createTweetedRelationship(23145, 12345)
+
+    connection.createTweetNode(65432, "Everyday")
+    connection.createTweetedRelationship(214354, 65432)
+    connection.createRetweetedRelationship(12453, 65432)
 
 }
 
