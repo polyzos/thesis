@@ -26,7 +26,7 @@ class Neo4jConnection(uri: String,
         }
     }
 
-    fun createUserNode(id: Long, screenName: String) {
+    fun createUserNode(id: Long?, screenName: String) {
         try {
             driver.session()
                 .writeTransaction {
@@ -113,6 +113,25 @@ class Neo4jConnection(uri: String,
         }
     }
 
+    fun createRepliedToRelationship(tweetId: Long, replyId: Long) {
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (p1:Post {id:'$tweetId'})
+                            MATCH (p2:Post {id:'$replyId'})
+                            MERGE (p1)-[:REPLIED_TO]->(p2)
+                            RETURN p1.id, p2.id
+                            """,
+                        parameters("tweetId", tweetId, "replyId", replyId))
+                        .single().get(0).asString()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn: $e")
+        }
+    }
+
     fun createRetweetedRelationship(screenName: String, id: Long) {
         try {
             driver.session()
@@ -122,6 +141,25 @@ class Neo4jConnection(uri: String,
                             MATCH (u:User {screen_name:'$screenName'})
                             MATCH (p: Post {id:'$id'})
                             MERGE (u)-[:MADE_RETWEETED]->(p)
+                            RETURN u.id, p.id
+                            """,
+                        parameters("screen_name", screenName, "id", id))
+                        .single().get(0).asString()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn: $e")
+        }
+    }
+
+    fun createRepliedRelationship(screenName: String, id: Long) {
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (u:User {screen_name:'$screenName'})
+                            MATCH (p: Post {id:'$id'})
+                            MERGE (u)-[:MADE_REPLY]->(p)
                             RETURN u.id, p.id
                             """,
                         parameters("screen_name", screenName, "id", id))
