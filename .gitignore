@@ -26,6 +26,8 @@ hs_err_pid*
 .gradle
 .idea
 .DS_STORE
+/build
+
 thesis-etl/build
 thesis-etl/.idea
 thesis-etl/.gradle
