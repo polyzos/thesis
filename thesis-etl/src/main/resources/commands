@@ -1,0 +1,3 @@
+twint -u username --followers -o file.json
+
+cat usernames.txt | while read LINE; do twint -u $LINE --followers -o  $LINE.json; done

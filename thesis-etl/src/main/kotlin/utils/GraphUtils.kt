@@ -1,6 +1,7 @@
 package utils
 
 import models.ParsedReTweet
+import models.ParsedReply
 import models.ParsedTweet
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
@@ -39,6 +40,15 @@ object GraphUtils {
                 """)
     }
 
+    internal fun findPostReplies(replyId: Long, spark: SparkSession): Dataset<Row> {
+        return spark.sql(
+            """
+                SELECT *
+                FROM replies
+                WHERE in_reply_to_status_id=$replyId
+                """)
+    }
+
     internal fun showPostsCountByUser(spark: SparkSession) {
         spark.sql("""
             SELECT COUNT(user_screen_name) as total_count, user_screen_name
@@ -74,6 +84,21 @@ object GraphUtils {
             row.getLong(10),
             row.getLong(11),
             row.getString(12)
+        )
+    }
+
+    internal fun rowToParsedReply(row: Row): ParsedReply {
+        return ParsedReply(
+            Utilities.parseDate(row.getString(0).split(".")[0]),
+            row.getLong(1),
+            row.getString(2),
+            row.getLong(3),
+            row.getLong(4),
+            row.getString(5),
+            row.getLong(6),
+            row.getLong(7),
+            row.getLong(8),
+            row.getString(9)
         )
     }
 }

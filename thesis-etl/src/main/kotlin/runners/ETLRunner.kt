@@ -10,7 +10,7 @@ fun main() {
     Logger.getLogger("org.apache").level = Level.WARN
 
     val spark = SparkSession.builder()
-        .appName("Tweets-Etl")
+        .appName("tweets-etl")
         .master("local[*]")
         .orCreate
 
