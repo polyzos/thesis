@@ -1,6 +1,8 @@
 package utils
 
 import org.apache.spark.sql.*
+import org.apache.spark.storage.StorageLevel
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -20,7 +22,7 @@ object Utilities {
 
         val fakeTweetsDataWithFields = fieldExtractor(fakeTweetsData)
         val fakeTweetsDataFlattened = flattenTweetUser(fakeTweetsDataWithFields)
-        fakeTweetsDataFlattened.cache()
+        fakeTweetsDataFlattened.persist(StorageLevel.MEMORY_AND_DISK())
 
         val sampleTweetsStreamData = spark.read().format("json")
             .option("header", "true")
@@ -30,7 +32,7 @@ object Utilities {
 
         val sampleTweetsStreamDataWithFields = fieldExtractor(sampleTweetsStreamData)
         val sampleTweetsStreamDataFlattened = flattenTweetUser(sampleTweetsStreamDataWithFields)
-        sampleTweetsStreamDataFlattened.cache()
+        sampleTweetsStreamDataFlattened.persist(StorageLevel.MEMORY_AND_DISK())
 
         val retweetsBatchData = spark.read().format("json")
             .option("header", "true")
@@ -99,21 +101,25 @@ object Utilities {
 
         val retweetPostsWithTweetMerged = retweetPostsWithTweet.union(moreRetweetsPostsWithTweet).dropDuplicates("id")
         println("""Found:
-            |   ${tweetsWithRetweets.count()} tweets
+            |    ${tweetsWithRetweets.count()} tweets
             |    ${retweetPostsWithTweetMerged.count()} retweets
             |    ${repliesWithTweets.count()} replies""".trimMargin()
         )
+
+
+        val usernames = retrieveUsernames(tweetsWithRetweets, spark).collectAsList().map { it.getString(0) }
+        println("Saving ${usernames.size} usernames to disk.")
+        File("src/main/resources/usernames.txt").bufferedWriter().use { out ->
+            usernames .forEach { out.write("$it\n") }
+        }
 
         saveToDisk(tweetsWithRetweets, "tweets.json")
         saveToDisk(retweetPostsWithTweetMerged, "retweets.json")
         saveToDisk(repliesWithTweets, "replies.json")
     }
 
-    internal fun retrieveUsernames(spark: SparkSession): Dataset<Row> {
-        return spark.sql("""
-            SELECT DISTINCT(user_screen_name)
-            FROM tweets
-            """)
+    internal fun retrieveUsernames(data: Dataset<Row>, spark: SparkSession): Dataset<Row> {
+        return data.select("user_screen_name").distinct()
     }
 
     internal fun parseDate(date: String): Date {
@@ -205,7 +211,7 @@ object Utilities {
             .write()
             .format("json")
             .mode(mode)
-            .save("src/runners.main/resources/output/$outputPath")
+            .save("src/main/resources/output/$outputPath")
 
     }
 }
