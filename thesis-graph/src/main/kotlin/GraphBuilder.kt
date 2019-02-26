@@ -17,11 +17,11 @@ fun main() {
     val schemaConstraint = SchemaConstraints(uri)
     val onionId: Long = 14075928
 
-    connection.deleteAll()
-    schemaConstraint.dropAll()
-
-    schemaConstraint.createUserConstraints()
-    schemaConstraint.createTweetConstraints()
+//    connection.deleteAll()
+//    schemaConstraint.dropAll()
+//
+//    schemaConstraint.createUserConstraints()
+//    schemaConstraint.createTweetConstraints()
 
 //    connection.createUserNode(post.user_id, post.user_screen_name)
 //    connection.createTweetNode(post.id, "TWEET")
@@ -39,20 +39,29 @@ fun main() {
 //        connection.createUserNode(++counter, it)
 //        connection.createFollowsRelationship(counter, onionId)
 //    }
+//
+//    connection.createUserNode(23145, "J. Cole")
+//    connection.createUserNode(214354, "Logic")
+//    connection.createUserNode(12453, "Eminem")
+//    connection.createFollowsRelationship(23145, 12453)
+//    connection.createFollowsRelationship(214354, 12453)
+//    connection.createFollowsRelationship(12453, 214354)
+//
+//    connection.createTweetNode(12345, "Wet Dreamz")
+//    connection.createTweetedRelationship(23145, 12345)
+//
+//    connection.createTweetNode(65432, "Everyday")
+//    connection.createTweetedRelationship(214354, 65432)
+//    connection.createRetweetedRelationship(12453, 65432)
 
-    connection.createUserNode(23145, "J. Cole")
-    connection.createUserNode(214354, "Logic")
-    connection.createUserNode(12453, "Eminem")
-    connection.createFollowsRelationship(23145, 12453)
-    connection.createFollowsRelationship(214354, 12453)
-    connection.createFollowsRelationship(12453, 214354)
+    println(connection.getTotalNodesCount())
+    println(connection.getTweetNodesCount())
+    println(connection.getUserNodesCount())
 
-    connection.createTweetNode(12345, "Wet Dreamz")
-    connection.createTweetedRelationship(23145, 12345)
-
-    connection.createTweetNode(65432, "Everyday")
-    connection.createTweetedRelationship(214354, 65432)
-    connection.createRetweetedRelationship(12453, 65432)
+    println(connection.getTotalEdgesCount())
+    println(connection.getFollowsEdgesCount())
+    println(connection.getTweetedEdgesCount())
+    println(connection.getRetweetedEdgesCount())
 
 }
 
