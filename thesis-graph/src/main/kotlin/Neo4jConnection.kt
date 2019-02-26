@@ -129,6 +129,126 @@ class Neo4jConnection(uri: String,
         }
     }
 
+    fun getTotalNodesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                           MATCH (n)
+                           RETURN count(*)
+                           """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getTotalNodesCount: $e")
+            return -1
+        }
+    }
+
+    fun getUserNodesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                           MATCH (:User)
+                           RETURN count(*)
+                           """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getUserNodesCount: $e")
+            return -1
+        }
+    }
+
+    fun getTweetNodesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                           MATCH (:Tweet)
+                           RETURN count(*)
+                           """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getTweetNodesCount: $e")
+            return -1
+        }
+    }
+
+    fun getTotalEdgesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                           MATCH ()-->()
+                           RETURN count(*)
+                           """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getAllEdgesCount: $e")
+            return -1
+        }
+
+    }
+
+    fun getFollowsEdgesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                        MATCH ()-[:FOLLOWS]->()
+                        RETURN count(*)
+                        """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getFollowsEdgesCount: $e")
+            return -1
+        }
+    }
+
+    fun getTweetedEdgesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH ()-[:TWEETED]->()
+                            RETURN count(*)
+                        """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getTweetedEdgesCount: $e")
+            return -1
+        }
+    }
+
+    fun getRetweetedEdgesCount(): Int {
+        try {
+            return driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                           MATCH ()-[:RETWEETED]->()
+                           RETURN count(*)
+                        """)
+                        .single().get(0).asInt()
+                }
+        } catch (e: Throwable) {
+            println("Failed txn in getRetweetedEdgesCount: $e")
+            return -1
+        }
+    }
+
     override fun close() {
         driver.close()
     }
