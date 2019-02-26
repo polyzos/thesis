@@ -22,7 +22,7 @@ dependencies {
     compile(group="org.apache.spark", name="spark-core_2.12", version= "2.4.0")
     compile(group="org.apache.spark", name="spark-sql_2.12", version= "2.4.0")
 
-    compile("com.natpryce:konfig:")
+    compile("com.natpryce:konfig:1.6.10.0")
 
     implementation("org.neo4j:neo4j-ogm-core:3.0.2") {
         exclude(group="com.fasterxml.jackson.core")
