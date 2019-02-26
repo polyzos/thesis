@@ -1,0 +1,2 @@
+rootProject.name = 'thesis'
+include("thesis-commons", "thesis-etl", "thesis-graph")
