@@ -24,7 +24,7 @@ object FollowersFetcherUtils {
                     }.toList()
             Thread.sleep(500)
             println("Retrieved: ${ids.size} follower's ids for user $screenName\n")
-            saveToFile(ids.map { it.toString() }, screenName + ".txt")
+            saveToFile(ids.map { it.toString() }, "$screenName.txt")
         } catch (e: PenicillinException) {
             println("Failed because: $e")
         }

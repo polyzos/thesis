@@ -86,7 +86,7 @@ data class UserMention(val id: Long,
 data class Urls(val urls: ArrayList<UrlDetails>)
 data class UrlDetails(val url: String,val expanded_url: String,val display_url: String,val indices: ArrayList<Int>)
 
-data class ExtendedTweet(val full_text: String,val display_text_range: ArrayList<Int>,val entities: Entities? = null,
+data class ExtendedTweet(val full_text: String, val display_text_range: ArrayList<Int>, val entities: Entities? = null,
                          val extended_entities: Entities? = null)
 
 data class Geo(val coordinates: ArrayList<Double>,val  `type`: String)

@@ -4,9 +4,6 @@ plugins {
     kotlin("jvm") version "1.3.21"
 }
 
-group = "com.ipolyzos"
-version = "1.0"
-
 repositories {
     mavenCentral()
 }
@@ -16,7 +13,7 @@ dependencies {
 }
 
 allprojects {
-    group = "io.pleo"
+    group = "com.ipolyzos"
     version = "1.0"
 
     repositories {

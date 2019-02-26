@@ -1,5 +1,3 @@
-package runners
-
 import com.natpryce.konfig.ConfigurationProperties
 import com.natpryce.konfig.Key
 import com.natpryce.konfig.stringType
@@ -49,7 +47,8 @@ fun main() {
             it.getLong(3),
             it.getLong(4),
             it.getLong(5),
-            it.getString(6))
+            it.getString(6)
+        )
     }
 
     tweetsList.forEach {

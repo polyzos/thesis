@@ -1,9 +1,7 @@
-package runners
-
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
-import utils.Utilities
+import utils.ETLUtils
 
 
 fun main() {
@@ -14,7 +12,7 @@ fun main() {
         .master("local[*]")
         .orCreate
 
-    Utilities.runSparkJob("../../tweets/", spark)
+    ETLUtils.runSparkJob("../../tweets/", spark)
 
     spark.close()
 }

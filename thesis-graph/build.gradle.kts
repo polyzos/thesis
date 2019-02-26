@@ -6,12 +6,18 @@ dependencies {
     // Kotlin libs
     "implementation"(kotlin("stdlib-jdk8"))
 
-    testCompile("junit:junit:4.12")
+    implementation(project(":thesis-commons"))
 
     // Neo4j
-    implementation("org.neo4j:neo4j-ogm-core:3.0.2")
-    implementation("org.neo4j:neo4j-ogm-bolt-driver:3.0.2")
+    implementation("org.neo4j:neo4j-ogm-core:3.0.2") {
+        exclude(group="com.fasterxml.jackson.core")
+    }
 
-    // Json
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
+    implementation("org.neo4j:neo4j-ogm-bolt-driver:3.0.2") {
+        exclude(group="com.fasterxml.jackson.core")
+    }
+
+    // Spark
+    compile(group="org.apache.spark", name="spark-core_2.12", version= "2.4.0")
+    compile(group="org.apache.spark", name="spark-sql_2.12", version= "2.4.0")
 }

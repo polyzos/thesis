@@ -6,12 +6,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-object Utilities {
+object ETLUtils {
 
-    private val fakeTweets = "fake_tweets.json"
-    private val retweetsBatch = "retweets_batch.json"
-    private val sampleTweetsStream = "sample_tweets_stream.json"
-    private val twitterDateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    private const val fakeTweets = "fake_tweets.json"
+    private const val retweetsBatch = "retweets_batch.json"
+    private const val sampleTweetsStream = "sample_tweets_stream.json"
 
     internal fun runSparkJob(pathPrefix: String, spark: SparkSession) {
         val fakeTweetsData = spark.read().format("json")
@@ -107,7 +106,7 @@ object Utilities {
         )
 
 
-        val usernames = retrieveUsernames(tweetsWithRetweets, spark).collectAsList().map { it.getString(0) }
+        val usernames = retrieveUsernames(tweetsWithRetweets).collectAsList().map { it.getString(0) }
         println("Saving ${usernames.size} usernames to disk.")
         File("src/main/resources/usernames.txt").bufferedWriter().use { out ->
             usernames .forEach { out.write("$it\n") }
@@ -118,12 +117,8 @@ object Utilities {
         saveToDisk(repliesWithTweets, "replies.json")
     }
 
-    internal fun retrieveUsernames(data: Dataset<Row>, spark: SparkSession): Dataset<Row> {
+    private fun retrieveUsernames(data: Dataset<Row>): Dataset<Row> {
         return data.select("user_screen_name").distinct()
-    }
-
-    internal fun parseDate(date: String): Date {
-        return twitterDateFormatter.parse(date.replace("T"," "))
     }
 
     private fun extractReTweetPostsFromBatch(data: Dataset<Row>): Dataset<Row>? {

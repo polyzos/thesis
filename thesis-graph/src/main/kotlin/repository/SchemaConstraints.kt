@@ -1,3 +1,5 @@
+package repository
+
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.GraphDatabase

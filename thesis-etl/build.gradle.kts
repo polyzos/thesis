@@ -16,21 +16,13 @@ dependencies {
     // Kotlin libs
     "implementation"(kotlin("stdlib-jdk8"))
 
-    testCompile("junit:junit:4.12")
+    implementation(project(":thesis-commons"))
 
     // Spark
     compile(group="org.apache.spark", name="spark-core_2.12", version= "2.4.0")
     compile(group="org.apache.spark", name="spark-sql_2.12", version= "2.4.0")
 
     compile("com.natpryce:konfig:1.6.10.0")
-
-    implementation("org.neo4j:neo4j-ogm-core:3.0.2") {
-        exclude(group="com.fasterxml.jackson.core")
-    }
-
-    implementation("org.neo4j:neo4j-ogm-bolt-driver:3.0.2") {
-        exclude(group="com.fasterxml.jackson.core")
-    }
 
     implementation("jp.nephy:penicillin:4.1.1")
     implementation("io.ktor:ktor-client-cio:1.1.3")
