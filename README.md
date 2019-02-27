@@ -26,4 +26,8 @@
 -----------------------   
 * TODO: Description about the graph algorithms
 
-   
+### TODO:
+---------
+1. Add logging instead to all the projects
+2. Extract variables to configuration and load the from there
+3. Add graph algorithms
