@@ -15,11 +15,6 @@ object FollowersFetcherUtils {
             val ids =
                 client.followers.listIdsByScreenName(screenName)
                     .untilLast().fold(emptySequence<Long>()) { acc, nextRes ->
-                        if (nextRes.rateLimit.remaining == 0) {
-                            println("Sleeping for 15 minutes because rate limit exceeded")
-                            Thread.sleep(60 * 15 * 1000 + 500)
-                        }
-                        println(nextRes.result.ids.size)
                         acc + nextRes.result.ids
                     }.toList()
             Thread.sleep(500)

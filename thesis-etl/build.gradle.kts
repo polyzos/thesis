@@ -24,7 +24,7 @@ dependencies {
 
     compile("com.natpryce:konfig:1.6.10.0")
 
-    implementation("jp.nephy:penicillin:4.1.1")
+    implementation("jp.nephy:penicillin:4.1.3-eap-2")
     implementation("io.ktor:ktor-client-cio:1.1.3")
 
 }

@@ -23,7 +23,7 @@ fun main() {
     val tweets = spark.read().format("json")
         .option("header", "true")
         .option("inferSchema", "true")
-        .load("src/main/resources/output/tweets.json")
+        .load("../data/output/tweets.json")
 
     val config = ConfigurationProperties.fromResource("config.properties")
 
@@ -39,17 +39,7 @@ fun main() {
         }
     }
 
-    val tweetsList = tweets.collectAsList().map {
-        ParsedTweet(
-            Utilities.parseDate(it.getString(0).split(".")[0]),
-            it.getLong(1),
-            it.getString(2),
-            it.getLong(3),
-            it.getLong(4),
-            it.getLong(5),
-            it.getString(6)
-        )
-    }
+    val tweetsList = tweets.collectAsList().map { Utilities.rowToParsedTweet(it) }
 
     tweetsList.forEach {
         println("User ${it.user_screen_name} should have ${it.user_followers_count} followers")
