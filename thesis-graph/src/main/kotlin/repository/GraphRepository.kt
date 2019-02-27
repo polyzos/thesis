@@ -6,6 +6,8 @@ interface GraphRepository {
 
     fun createFollowsRelationship(follower: Long, followee: Long)
 
+    fun createFollowsRelationship(follower: String, followee: String)
+
     fun createTweetNode(id: Long, type: String)
 
     fun createTweetedRelationship(screenName: String, id: Long)

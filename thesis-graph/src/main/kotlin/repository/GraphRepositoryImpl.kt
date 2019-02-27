@@ -26,20 +26,46 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
         }
     }
 
+    /**
+     * Follows Relationship with Long Values MATCH Lookup
+     */
     override fun createFollowsRelationship(follower: Long, followee: Long) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (follower: User {id: $follower})
-                            MATCH (followee: User {id: $followee})
+                            MATCH (follower:User {id: $follower})
+                            MATCH (followee:User {id: $followee})
                             MERGE (follower)-[:FOLLOWS]->(followee)
                             RETURN follower.id, followee.id""",
                         Values.parameters("id", follower, "id", followee)
                     )
                         .single().get(0)
                 }
+        } catch (e: Throwable) {
+            println("Failed txn in createFollowsRelationship: $e")
+        }
+    }
+
+    /**
+     * Follows Relationship with String Values MATCH Lookup
+     */
+    override fun createFollowsRelationship(follower: String, followee: String) {
+        try {
+            driver.session()
+                .writeTransaction {
+                    it.run(
+                        """
+                            MATCH (follower:User {screen_name: '$follower'}
+                            MATCH (followee:User {screen_name: '$followee'}
+                            MERGE (follower)-[:FOLLOWS]->(followee)
+                            RETURN follower.screen_name, followee.screen_name""",
+                        Values.parameters("screen_name", follower, "screen_name", followee)
+                    )
+                        .single().get(0)
+                }
+
         } catch (e: Throwable) {
             println("Failed txn in createFollowsRelationship: $e")
         }
