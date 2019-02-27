@@ -5,7 +5,7 @@
 -----------------
 **1. Data Collection** (to be reimplemented in Kotlin)                   
 **2. Data Wrangling & Preprocessing** - Spark and Kotlin      
-**3. Graph Creation & Crud In Cypher**- Cypher and Kotlin
+**3. Graph Creation & Crud In Cypher**- Cypher and Kotlin  
 **4. Graph Algorithms**               - Cypher and Spark GraphFrames and Kotlin 
 
 ### 1. Data Collection
