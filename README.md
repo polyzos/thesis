@@ -31,3 +31,4 @@
 1. Add logging instead to all the projects
 2. Extract variables to configuration and load the from there
 3. Add graph algorithms
+4. Containarize the project and add bash scripts
