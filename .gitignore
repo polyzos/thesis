@@ -41,3 +41,5 @@ thesis-graph/.gradle/*
 thesis-graph/.idea/*
 thesis-graph/.DS_Store
 thesis-graph/build
+
+thesis-commons/out

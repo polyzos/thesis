@@ -1,7 +1,5 @@
 package repository
 
-import org.neo4j.driver.v1.Values
-
 interface GraphRepository {
 
     fun createUserNode(id: Long, screenName: String)

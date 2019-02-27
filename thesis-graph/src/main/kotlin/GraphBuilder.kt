@@ -3,6 +3,7 @@ import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
 import repository.GraphRepositoryImpl
 import repository.Neo4jConnection
+import repository.SchemaConstraints
 import utils.GraphUtils
 import utils.Utilities
 
@@ -35,7 +36,11 @@ fun main() {
 
     val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
     val graphRepository = GraphRepositoryImpl(connection.getDriver())
+    val schemaConstraints = SchemaConstraints(connection.getDriver())
+
     graphRepository.deleteAll()
+    schemaConstraints.dropAll()
+    schemaConstraints.createConstraints()
 
 
     tweets.collectAsList()

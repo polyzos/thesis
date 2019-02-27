@@ -15,11 +15,11 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (user: User {screen_name:'$screenName',id : '$id'})
+                            MERGE (user:User {screen_name: '$screenName', id : $id})
                             RETURN user.id""",
                         Values.parameters("id", id, "screen_name", screenName)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createUserNode: $e")
@@ -32,13 +32,13 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (follower: User {id: '$follower'})
-                            MATCH (followee: User {id: '$followee'})
+                            MATCH (follower: User {id: $follower})
+                            MATCH (followee: User {id: $followee})
                             MERGE (follower)-[:FOLLOWS]->(followee)
                             RETURN follower.id, followee.id""",
                         Values.parameters("id", follower, "id", followee)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createFollowsRelationship: $e")
@@ -51,11 +51,11 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (tweet: Tweet {id: '$id', type:'$type'})
+                            MERGE (tweet:Tweet {id: $id, type:'$type'})
                             RETURN tweet.id""",
                         Values.parameters("id", id, "type", type)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createTweetNode: $e")
@@ -67,14 +67,14 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
             driver.session()
                 .writeTransaction {
                     it.run( """
-                        MATCH (u: User {screen_name:'$screenName'})
-                        MATCH (p: Post {id:'$id'})
+                        MATCH (u:User {screen_name: '$screenName'})
+                        MATCH (p:Tweet {id: $id})
                         MERGE (u)-[:TWEETED]->(p)
                         RETURN u.id, p.id
                         """,
                         Values.parameters("screen_name", screenName, "id", id)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createTweetedRelationship: $e")
@@ -87,14 +87,14 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (u:User {screen_name:'$screenName'})
-                            MATCH (p: Post {id:'$id'})
+                            MATCH (u:User {screen_name: '$screenName'})
+                            MATCH (p:Tweet {id: $id})
                             MERGE (u)-[:MADE_RETWEETED]->(p)
                             RETURN u.id, p.id
                             """,
                         Values.parameters("screen_name", screenName, "id", id)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createRetweetedRelationship: $e")
@@ -107,14 +107,14 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (p1:Post {id:'$tweetId'})
-                            MATCH (p2:Post {id:'$replyId'})
+                            MATCH (p1:Tweet {id: $tweetId})
+                            MATCH (p2:Tweet {id: $replyId})
                             MERGE (p1)-[:REPLIED_TO]->(p2)
                             RETURN p1.id, p2.id
                             """,
                         Values.parameters("tweetId", tweetId, "replyId", replyId)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createRepliedToRelationship: $e")
@@ -127,14 +127,14 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (p1:Post {id:'$tweetId'})
-                            MATCH (p2:Post {id:'$retweetId'})
+                            MATCH (p1:Tweet {id: $tweetId})
+                            MATCH (p2:Tweet {id: $retweetId})
                             MERGE (p1)-[:RETWEETED_FROM]->(p2)
                             RETURN p1.id, p2.id
                             """,
                         Values.parameters("tweetId", tweetId, "retweetId", retweetId)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createRetweetedFromRelationship: $e")
@@ -147,12 +147,12 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                       MATCH (tweet:Tweet {id: '$id'})
+                       MATCH (tweet:Tweet {id: $id})
                        RETURN tweet.id
                        """,
                         Values.parameters("id", id)
                     )
-                        .single().get(0).asString()
+                        .single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in getTweetInfo: $e")
