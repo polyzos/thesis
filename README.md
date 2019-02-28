@@ -21,8 +21,23 @@ More information can be found on this link: https://arxiv.org/pdf/1707.07592.pdf
 Running the crawler for almost a week generates about 25GB of data, from the live stream as well as from the sources that are marked as Fake News Generators
 ### 2. Preprocessing (ETL-Pipeline)
 ----------------------------------
-* TODO: Description about the preprocessing
+- **thesis-etl** contains the preprocessing pipeline.
 
+Our pipeline includes the following steps:
+1. First we load all the data collected from the data collection layer
+2. We separate our data into three categories - Tweets, Retweets, Replies and we remove duplicates that might exists
+3. We do some analysis on our data in order to keep:
+    - only those tweets for which we have retweets
+    - only those retweets for which we have the original tweet post
+    - only those replies for which we have the original tweet post
+4. In order to minimize the size of our data, we keep only the fields that are of interest:
+    - For the tweets we keep the fields - created_at , id, in_reply_to_screen_name, in_reply_to_status_id, in_reply_to_user_id, retweeted_status, text, user
+    - For the retweets we keep the fields - created_at , id, retweeted_status, text, user
+    - For the replies we keep the fields - created_at , id, in_reply_to_screen_name, in_reply_to_status_id, in_reply_to_user_id, text, user
+<br>Some of those fields, like retweeted_status and user contain nested fields which get flattened as part of the provess
+5. Then from the tweets we gather, we extract the unique usernames
+6. For every user that we have we retrieve a list with all of their followers
+7. When the preprocessing pipeline finishes, all the data gets stored on the filesystem for now.
 
 ### 3. Graph Builder
 --------------------
