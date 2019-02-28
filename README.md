@@ -9,9 +9,16 @@
 **4. Graph Algorithms**               - Cypher and Spark GraphFrames and Kotlin 
 
 ### 1. Data Collection
--------------------
-* TODO: Description about the data crawler
-   
+----------------------
+- *thesis-crawler* contains an akka based system, that creates our dataset.
+
+More specifically, the program comprises of three actor: <br>
+1. StreamListenerActor - monitors a list of sources that have been characterized as sources that generate fake news
+More information can be found on this link: <br>https://arxiv.org/pdf/1707.07592.pdf
+2. RetweetHandlerActor - when the StreamListenerActor receives retweets, RetweetHandlerActor fetches the 100 most recent posts for that tweet.
+3. SampleStreamListenerActor - Monitors the twitter live stream and fetcher all the incoming data.
+
+Running the crawler for almost a week generates about 25GB of data, from the live stream as well as from the sources that are marked as Fake News Generators
 ### 2. Preprocessing (ETL-Pipeline)
 ----------------------------------
 * TODO: Description about the preprocessing
