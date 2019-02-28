@@ -10,7 +10,7 @@
 
 ### 1. Data Collection
 ----------------------
-- **thesis-crawler** contains an akka based system, that creates our dataset.
+- **thesis-crawler** contains an akka based crawler, that generates our dataset.
 
 More specifically, the program comprises of three actor: <br>
 1. StreamListenerActor - monitors a list of sources that have been characterized as sources that generate fake news
