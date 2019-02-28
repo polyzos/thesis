@@ -14,7 +14,7 @@
 
 More specifically, the program comprises of three actor: <br>
 1. StreamListenerActor - monitors a list of sources that have been characterized as sources that generate fake news
-More information can be found on this link: <br>https://arxiv.org/pdf/1707.07592.pdf
+More information can be found on this link: https://arxiv.org/pdf/1707.07592.pdf
 2. RetweetHandlerActor - when the StreamListenerActor receives retweets, RetweetHandlerActor fetches the 100 most recent posts for that tweet.
 3. SampleStreamListenerActor - Monitors the twitter live stream and fetcher all the incoming data.
 
