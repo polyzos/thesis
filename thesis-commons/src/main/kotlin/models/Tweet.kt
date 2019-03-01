@@ -45,7 +45,7 @@ data class Tweet(
 data class StatusMetadata(val iso_language_code : String, val result_type : String)
 
 data class Contributor(val id: Long, val id_str: String, val screen_name: String)
-data class Coordinates(val coordinates: ArrayList<Double>,val `type`: String)
+data class Coordinates(val coordinates: ArrayList<Double>,val type: String)
 data class TweetId(val id: Long,val id_str: String)
 
 data class Entities(val hashtags: ArrayList<HashTag>,
@@ -69,7 +69,7 @@ data class Media(val display_url: String,
                  val sizes: Map<String, Size>,
                  val source_status_id: Long? = null,
                  val source_status_id_str: String?,
-                 val `type`: String,
+                 val type: String,
                  val url: String,
                  val video_info: VideoInfo?)
 
@@ -89,7 +89,7 @@ data class UrlDetails(val url: String,val expanded_url: String,val display_url: 
 data class ExtendedTweet(val full_text: String, val display_text_range: ArrayList<Int>, val entities: Entities? = null,
                          val extended_entities: Entities? = null)
 
-data class Geo(val coordinates: ArrayList<Double>,val  `type`: String)
+data class Geo(val coordinates: ArrayList<Double>,val  type: String)
 
 data class GeoPlace(val attributes: Map<String, String>,
                     val bounding_box: Area,
@@ -104,7 +104,7 @@ data class GeoPlace(val attributes: Map<String, String>,
                     val centroid: ArrayList<Double>,
                     val polylines: ArrayList<String>)
 
-data class Area(val coordinates: ArrayList<ArrayList<ArrayList<Double>>>, val `type`: String)
+data class Area(val coordinates: ArrayList<ArrayList<ArrayList<Double>>>, val type: String)
 
 data class User(val blocked_by: Boolean = false,
                 val blocking: Boolean = false,
