@@ -41,8 +41,16 @@ Our pipeline includes the following steps:
 
 ### 3. Graph Builder
 --------------------
-* TODO: Description about the graph builder
+- **thesis-graph** contains the graph database generator.
 
+The Graph Builder is a suite of methods that:
+1. Receives preprocessed data modeled appropriately.
+2. Creates appropriate constraints and indexes for the graph database.
+3. Inserts the data in the database using the correct format, ex:
+    - Users are inserted as Nodes
+    - Tweets are inserted as Nodes
+    - The relationship that states a User posted a Tweet is inserted as an Edge connecting the two Nodes.
+4. The data is being persisted in the Graph Database allowing someone to run algorithms on the Graph Model.
 
 ### 4. Graph Algorithms
 -----------------------   
