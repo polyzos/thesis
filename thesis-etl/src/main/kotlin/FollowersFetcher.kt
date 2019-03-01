@@ -5,7 +5,6 @@ import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.session.config.account
 import jp.nephy.penicillin.core.session.config.application
 import jp.nephy.penicillin.core.session.config.token
-import models.ParsedTweet
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
@@ -23,7 +22,7 @@ fun main() {
     val tweets = spark.read().format("json")
         .option("header", "true")
         .option("inferSchema", "true")
-        .load("../data/output/tweets.json")
+        .load("data/output/tweets.json")
 
     val config = ConfigurationProperties.fromResource("config.properties")
 

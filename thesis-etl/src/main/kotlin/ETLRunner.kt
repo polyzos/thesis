@@ -12,7 +12,7 @@ fun main() {
         .master("local[*]")
         .orCreate
 
-    ETLUtils.runSparkJob("../../tweets/", spark)
+    ETLUtils.runSparkJob("../tweets/", spark)
 
     spark.close()
 }

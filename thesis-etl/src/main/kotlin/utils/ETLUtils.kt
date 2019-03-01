@@ -108,7 +108,7 @@ object ETLUtils {
 
         val usernames = retrieveUsernames(tweetsWithRetweets).collectAsList().map { it.getString(0) }
         println("Saving ${usernames.size} usernames to disk.")
-        File("src/main/resources/usernames.txt").bufferedWriter().use { out ->
+        File("data/usernames.txt").bufferedWriter().use { out ->
             usernames .forEach { out.write("$it\n") }
         }
 
@@ -206,7 +206,7 @@ object ETLUtils {
             .write()
             .format("json")
             .mode(mode)
-            .save("src/main/resources/output/$outputPath")
+            .save("data/output/$outputPath")
 
     }
 }

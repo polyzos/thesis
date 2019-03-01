@@ -5,7 +5,6 @@ import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.followers
 import jp.nephy.penicillin.endpoints.followers.listIdsByScreenName
 import jp.nephy.penicillin.extensions.cursor.untilLast
-import jp.nephy.penicillin.extensions.rateLimit
 import java.io.File
 
 object FollowersFetcherUtils {
@@ -15,9 +14,9 @@ object FollowersFetcherUtils {
             val ids =
                 client.followers.listIdsByScreenName(screenName)
                     .untilLast().fold(emptySequence<Long>()) { acc, nextRes ->
+                        println("${nextRes.result.ids.size} - ${nextRes.result.ids}")
                         acc + nextRes.result.ids
                     }.toList()
-            Thread.sleep(500)
             println("Retrieved: ${ids.size} follower's ids for user $screenName\n")
             saveToFile(ids.map { it.toString() }, "$screenName.txt")
         } catch (e: PenicillinException) {
@@ -27,7 +26,7 @@ object FollowersFetcherUtils {
     }
 
     private fun saveToFile(data: List<String>, filename: String) {
-        File("src/main/resources/user_followers/$filename").bufferedWriter().use { out ->
+        File("data/test/$filename").bufferedWriter().use { out ->
             data.forEach { out.write("$it\n") }
         }
 
