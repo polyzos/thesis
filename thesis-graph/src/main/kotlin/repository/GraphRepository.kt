@@ -1,5 +1,6 @@
 package repository
 
+import models.ParsedTweet
 import java.util.*
 
 interface GraphRepository {
@@ -10,7 +11,7 @@ interface GraphRepository {
 
     fun createFollowsRelationship(follower: String, followee: String)
 
-    fun createTweetNode(id: Long, type: String)
+    fun createTweetNode(id: Long, created_at: Date, text: String, type: String)
 
     fun createTweetedRelationship(screenName: String, id: Long)
 

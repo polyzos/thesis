@@ -1,5 +1,6 @@
 package repository
 
+import models.ParsedTweet
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.Values
 import java.util.*
@@ -72,15 +73,15 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
         }
     }
 
-    override fun createTweetNode(id: Long, type: String) {
+    override fun createTweetNode(id: Long, created_at: Date, text: String, type: String) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MERGE (tweet:Tweet {id: $id, type:'$type'})
+                            MERGE (tweet:Tweet {id: $id, created_at: '$created_at', text: "$text", type:'$type'})
                             RETURN tweet.id""",
-                        Values.parameters("id", id, "type", type)
+                        Values.parameters("id", id, "created_at", created_at.toString(), "text", text, "type", type)
                     )
                         .single().get(0)
                 }

@@ -19,17 +19,17 @@ fun main() {
     val tweets = spark.read().format("json")
         .option("header", "true")
         .option("inferSchema", "true")
-        .load("src/main/resources/output/tweets.json")
+        .load("data/output/tweets.json")
 
     val retweets = spark.read().format("json")
         .option("header", "true")
         .option("inferSchema", "true")
-        .load("src/main/resources/output/retweets.json")
+        .load("data/output/retweets.json")
 
     val replies = spark.read().format("json")
         .option("header", "true")
         .option("inferSchema", "true")
-        .load("src/main/resources/output/replies.json")
+        .load("data/output/replies.json")
 
     tweets.createOrReplaceTempView("tweets")
     retweets.createOrReplaceTempView("retweets")
@@ -54,7 +54,7 @@ fun main() {
 
             // Store tweet in the database
             graphRepository.createUserNode(it.user_id, it.user_screen_name)
-            graphRepository.createTweetNode(it.id, "TWEET")
+            graphRepository.createTweetNode(it.id, it.created_at, it.text, "TWEET")
             graphRepository.createTweetedRelationship(it.user_screen_name, it.id)
 
             // Store each of its retweets in the database
@@ -62,13 +62,13 @@ fun main() {
                 .map { fr -> Utilities.rowToParsedRetweet(fr) }
                 .forEachIndexed { index , fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, "RETWEET")
+                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text, "RETWEET")
                     if (index == 0) {
                         graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     } else {
                         val previous = fetchedRetweets.collectAsList()
                             .map { fr -> Utilities.rowToParsedRetweet(fr) }
-                            .get(index)
+                            .get(index - 1)
                         graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
                     }
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
@@ -79,7 +79,7 @@ fun main() {
                 .map { fr -> Utilities.rowToParsedReply(fr) }
                 .forEach { fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, "IN_REPLY_TO")
+                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text, "IN_REPLY_TO")
                     graphRepository.createRepliedToRelationship(fr.id, fr.in_reply_to_status_id)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
