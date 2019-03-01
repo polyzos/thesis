@@ -1,5 +1,7 @@
 package repository
 
+import java.util.*
+
 interface GraphRepository {
 
     fun createUserNode(id: Long, screenName: String)
@@ -16,7 +18,7 @@ interface GraphRepository {
 
     fun createRepliedToRelationship(tweetId: Long, replyId: Long)
 
-    fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long)
+    fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long, created_at: Date)
 
     fun getTweetInfo(id: Long)
 

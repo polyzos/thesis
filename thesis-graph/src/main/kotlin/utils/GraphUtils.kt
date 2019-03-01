@@ -34,6 +34,7 @@ object GraphUtils {
                 SELECT *
                 FROM retweets
                 WHERE retweeted_status_id=$retweetId
+                ORDER BY created_at
                 """)
     }
 

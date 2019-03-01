@@ -2,6 +2,7 @@ package repository
 
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.Values
+import java.util.*
 
 class GraphRepositoryImpl(val driver: Driver): GraphRepository {
 
@@ -147,15 +148,15 @@ class GraphRepositoryImpl(val driver: Driver): GraphRepository {
         }
     }
 
-    override fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long) {
+    override fun createRetweetedFromRelationship(retweetId: Long, tweetId: Long, created_at: Date) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (p1:Tweet {id: $tweetId})
-                            MATCH (p2:Tweet {id: $retweetId})
-                            MERGE (p1)-[:RETWEETED_FROM]->(p2)
+                            MATCH (p1:Tweet {id: $retweetId})
+                            MATCH (p2:Tweet {id: $tweetId})
+                            MERGE (p1)-[:RETWEETED_FROM {timestamp: '$created_at'}]->(p2)
                             RETURN p1.id, p2.id
                             """,
                         Values.parameters("tweetId", tweetId, "retweetId", retweetId)

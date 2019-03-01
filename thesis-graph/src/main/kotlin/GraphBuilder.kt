@@ -1,3 +1,4 @@
+import models.ParsedReTweet
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
@@ -34,7 +35,7 @@ fun main() {
     retweets.createOrReplaceTempView("retweets")
     replies.createOrReplaceTempView("replies")
 
-    val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
+    val connection = Neo4jConnection("bolt://localhost:7687")
     val graphRepository = GraphRepositoryImpl(connection.getDriver())
     val schemaConstraints = SchemaConstraints(connection.getDriver())
 
@@ -59,11 +60,19 @@ fun main() {
             // Store each of its retweets in the database
             fetchedRetweets.collectAsList()
                 .map { fr -> Utilities.rowToParsedRetweet(fr) }
-                .forEach { fr ->
+                .forEachIndexed { index , fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
                     graphRepository.createTweetNode(fr.id, "RETWEET")
-                    graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id)
+                    if (index == 0) {
+                        graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
+                    } else {
+                        val previous = fetchedRetweets.collectAsList()
+                            .map { fr -> Utilities.rowToParsedRetweet(fr) }
+                            .get(index)
+                        graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
+                    }
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
+
                 }
 
             fetchedReplies.collectAsList()
