@@ -1,11 +1,10 @@
 package repository
 
-import models.ParsedTweet
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.Values
 import java.util.*
 
-class GraphRepositoryImpl(val driver: Driver): GraphRepository {
+class GraphRepositoryImpl(private val driver: Driver): GraphRepository {
 
     /**
      * TODO: Need to break it down further

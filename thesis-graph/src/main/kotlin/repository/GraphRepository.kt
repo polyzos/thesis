@@ -1,6 +1,5 @@
 package repository
 
-import models.ParsedTweet
 import java.util.*
 
 interface GraphRepository {

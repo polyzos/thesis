@@ -1,4 +1,3 @@
-import models.ParsedReTweet
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
@@ -32,10 +31,29 @@ fun main() {
         .load("data/output/replies.json")
 
     tweets.createOrReplaceTempView("tweets")
-    retweets.createOrReplaceTempView("retweets")
+    retweets.withColumnRenamed("id", "retweet_id").createOrReplaceTempView("retweets")
     replies.createOrReplaceTempView("replies")
 
-    val connection = Neo4jConnection("bolt://localhost:7687")
+    /**
+     * Find number of retweets of each tweets
+     * */
+    val tweetsWithRetweetCounts = GraphUtils.retrieveTweetsWithRetweetCounts(spark)
+    tweetsWithRetweetCounts.cache()
+
+    /**
+     * Find some statistics for count
+     * */
+    tweetsWithRetweetCounts.describe().show()
+
+    // Keep tweets with more that 10 retweets
+    val tweetsAboveThreshold = GraphUtils.retrieveTweetsAboveThreshold(
+        10,
+        tweetsWithRetweetCounts,
+        spark)
+
+    println(tweetsAboveThreshold.count())
+
+    val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
     val graphRepository = GraphRepositoryImpl(connection.getDriver())
     val schemaConstraints = SchemaConstraints(connection.getDriver())
 
@@ -44,7 +62,7 @@ fun main() {
     schemaConstraints.createConstraints()
 
 
-    tweets.collectAsList()
+    tweetsAboveThreshold.collectAsList()
         .map { Utilities.rowToParsedTweet(it) }
         .forEach {
             // foreach post find its retweets
@@ -54,25 +72,17 @@ fun main() {
 
             // Store tweet in the database
             graphRepository.createUserNode(it.user_id, it.user_screen_name)
-            graphRepository.createTweetNode(it.id, it.created_at, it.text, "TWEET")
+            graphRepository.createTweetNode(it.id, it.created_at, it.text,"TWEET")
             graphRepository.createTweetedRelationship(it.user_screen_name, it.id)
 
             // Store each of its retweets in the database
             fetchedRetweets.collectAsList()
                 .map { fr -> Utilities.rowToParsedRetweet(fr) }
-                .forEachIndexed { index , fr ->
+                .forEach { fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text, "RETWEET")
-                    if (index == 0) {
-                        graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
-                    } else {
-                        val previous = fetchedRetweets.collectAsList()
-                            .map { fr -> Utilities.rowToParsedRetweet(fr) }
-                            .get(index - 1)
-                        graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
-                    }
+                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text,"RETWEET")
+                    graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
-
                 }
 
             fetchedReplies.collectAsList()

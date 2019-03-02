@@ -28,6 +28,29 @@ object GraphUtils {
                 """)
     }
 
+    internal fun retrieveTweetsAboveThreshold(threshold: Int, data: Dataset<Row>, spark: SparkSession): Dataset<Row> {
+        data.filter("count > $threshold")
+            .createOrReplaceTempView("tweetsWithRetweets")
+
+        return spark.sql(
+            """
+            SELECT *
+            FROM tweets
+            WHERE id IN (SELECT id FROM tweetsWithRetweets)
+        """.trimIndent())
+    }
+
+    internal fun retrieveTweetsWithRetweetCounts(spark: SparkSession): Dataset<Row> {
+        return spark.sql(
+            """
+                SELECT id, COUNT(id) as count
+                FROM tweets
+                JOIN retweets ON tweets.id == retweets.retweeted_status_id
+                GROUP BY id
+                ORDER BY count DESC
+                """.trimIndent())
+    }
+
     internal fun findPostRetweets(retweetId: Long, spark: SparkSession): Dataset<Row> {
         return spark.sql(
             """
