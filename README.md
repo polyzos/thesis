@@ -62,5 +62,5 @@ The Graph Builder is a suite of methods that:
 2. Extract variables to configuration and load the from there
 3. Add graph algorithms
 4. Add Testing
-5. Containarize the project and add bash scripts
+5. Containerize the project and add bash scripts
 6. Add CI/CD
