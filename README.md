@@ -52,6 +52,8 @@ The Graph Builder is a suite of methods that:
     - The relationship that states a User posted a Tweet is inserted as an Edge connecting the two Nodes.
 4. The data is being persisted in the Graph Database allowing someone to run algorithms on the Graph Model.
 
+When a tweet is parsed, we are fetching all the retweets for it. The retweets are being ordered by their timestamp. Then, they are being inserted into the Graph Database resulting in a chain of retweets, all ordered by their timestamp, pointing to the original tweet.
+
 ### 4. Graph Algorithms
 -----------------------   
 * TODO: Description about the graph algorithms
