@@ -78,9 +78,17 @@ fun main() {
             // Store each of its retweets in the database
             fetchedRetweets.collectAsList()
                 .map { fr -> Utilities.rowToParsedRetweet(fr) }
-                .forEach { fr ->
+                .forEachIndexed {index, fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text,"RETWEET")
+                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text, "RETWEET")
+                    if (index == 0) {
+                        graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
+                    } else {
+                        val previous = fetchedRetweets.collectAsList()
+                            .map { fr -> Utilities.rowToParsedRetweet(fr) }
+                            .get(index - 1)
+                        graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
+                    }
                     graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
