@@ -31,7 +31,7 @@ Our pipeline includes the following steps:
     - only those retweets for which we have the original tweet post
     - only those replies for which we have the original tweet post
 4. In order to minimize the size of our data, we keep only the fields that are of interest:
-    - For the <a name="tweets">tweets</a> we keep the fields - **created_at** , **id, in_reply_to_screen_name**, **in_reply_to_status_id**, **in_reply_to_user_id**, **retweeted_status**, **text**, **user**
+    - For the <a name="tweet">tweets</a> we keep the fields - **created_at** , **id, in_reply_to_screen_name**, **in_reply_to_status_id**, **in_reply_to_user_id**, **retweeted_status**, **text**, **user**
     - For the <a name="retweets">retweets</a> we keep the fields - **created_at**, **id**, **retweeted_status**, **text**, **user**
     - For the <a name="replies">replies</a> we keep the fields - **created_at**, **id**, **in_reply_to_screen_name**, **in_reply_to_status_id**, **in_reply_to_user_id**, **text**, **user**
 <br>Some of those fields, like retweeted_status and user contain nested fields which get flattened as part of the process
