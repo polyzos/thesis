@@ -54,11 +54,11 @@ The Graph Builder is a suite of methods that:
 
 When a [tweet](#tweet) is parsed, we are fetching details about it like the User posting the tweet, retweets, replies etc.
 
-Parsed tweets are inserted into the Graph Database along with information regarding the user posted the tweet, tweet id, text of the tweet. We extract information about a user and create a User Node with details about his screen_name and id. Then, we connect the User Node and the Tweet Node with a :TWEETED relationship. 
+Parsed tweets are inserted into the Graph Database along with information regarding the user posted the tweet, tweet id, text of the tweet. We extract information about a user and create a User Node with details about his screen_name and id. Then, we connect the User Node and the Tweet Node with a **:TWEETED** relationship. 
 
-We hold information about [retweets](#retweets) of tweets and [replies](#replies) to tweets. All the retweets and replies for a specific tweet are ordered by their created_at attribute. Then, we insert them into the Graph Database resulting in a chain of retweets and replies, all ordered by their created_at attribute, pointing to the original tweet. They are connected with each other with edges tagged as :RETWEETED_FROM and :REPLIED_TO.
+We hold information about [retweets](#retweets) of tweets and [replies](#replies) to tweets. All the retweets and replies for a specific tweet are ordered by their created_at attribute. Then, we insert them into the Graph Database resulting in a chain of retweets and replies, all ordered by their created_at attribute, pointing to the original tweet. They are connected with each other with edges tagged as **:RETWEETED_FROM** and **:REPLIED_TO**.
 
-We, also, depict the relationship a user following another user with an edge tagged :FOLLOWS connecting two nodes, and an arrow pointing to the followed user node. 
+We, also, depict the relationship a user following another user with an edge tagged **:FOLLOWS** connecting two nodes, and an arrow pointing to the followed user node. 
 
 
 ### 4. Graph Algorithms
