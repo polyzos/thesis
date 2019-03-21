@@ -6,6 +6,7 @@ import repository.Neo4jConnection
 import repository.SchemaConstraints
 import utils.GraphUtils
 import utils.Utilities
+import java.io.File
 
 fun main() {
     Logger.getLogger("org.apache").level = Level.WARN
@@ -72,7 +73,7 @@ fun main() {
 
             // Store tweet in the database
             graphRepository.createUserNode(it.user_id, it.user_screen_name)
-            graphRepository.createTweetNode(it.id, it.created_at, it.text,"TWEET")
+            graphRepository.createTweetNode(it.id, it.created_at, it.text.replace("\"",""),"TWEET")
             graphRepository.createTweetedRelationship(it.user_screen_name, it.id)
 
             // Store each of its retweets in the database
@@ -80,13 +81,12 @@ fun main() {
                 .map { fr -> Utilities.rowToParsedRetweet(fr) }
                 .forEachIndexed {index, fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text, "RETWEET")
+                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text.replace("\"",""), "RETWEET")
                     if (index == 0) {
                         graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     } else {
                         val previous = fetchedRetweets.collectAsList()
-                            .map { fr -> Utilities.rowToParsedRetweet(fr) }
-                            .get(index - 1)
+                            .map { fr -> Utilities.rowToParsedRetweet(fr) }[index - 1]
                         graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
                     }
                     graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
@@ -97,23 +97,23 @@ fun main() {
                 .map { fr -> Utilities.rowToParsedReply(fr) }
                 .forEach { fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text, "IN_REPLY_TO")
+                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text.replace("\"",""), "IN_REPLY_TO")
                     graphRepository.createRepliedToRelationship(fr.id, fr.in_reply_to_status_id)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
 
-//            if (File("src/main/resources/user_followers/${it.user_screen_name}.json").exists()) {
-//                val followers =
-//                    File("src/main/resources/user_followers/${it.user_screen_name}.json")
-//                        .useLines { f -> f.toList() }
-//                followers.forEach { f ->
-//                    connection.createUserNode(null, f)
-//                    connection.createFollowsRelationship(f, it.user_screen_name)
-//                }
-//
-//            } else {
-//                println("Failed to retrieve followers for user ${it.user_screen_name}")
-//            }
+            if (File("data/user_followers/${it.user_screen_name}.json").exists()) {
+                val followers =
+                    File("data/user_followers/${it.user_screen_name}.json")
+                        .useLines { f -> f.toList() }
+                followers.forEach { f ->
+                    graphRepository.createUserNode(1L, f)
+                    graphRepository.createFollowsRelationship(f, it.user_screen_name)
+                }
+
+            } else {
+                println("Failed to retrieve followers for user ${it.user_screen_name}")
+            }
         }
 
     println("Saved records to the database.")
