@@ -58,13 +58,12 @@ class GraphRepositoryImpl(private val driver: Driver): GraphRepository {
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (follower:User {screen_name: '$follower'}
-                            MATCH (followee:User {screen_name: '$followee'}
-                            MERGE (follower)-[:FOLLOWS]->(followee)
-                            RETURN follower.screen_name, followee.screen_name""",
-                        Values.parameters("screen_name", follower, "screen_name", followee)
-                    )
-                        .single().get(0)
+                            MERGE (f1:User {screen_name: '$follower'})
+                            MERGE (f2:User {screen_name: '$followee'})
+                            MERGE (f1)-[:FOLLOWS]->(f2)
+                            RETURN f1.screen_name, f2.screen_name""",
+                        Values.parameters("follower", follower, "followee", followee)
+                    ).single().get(0)
                 }
 
         } catch (e: Throwable) {

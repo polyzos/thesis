@@ -7,6 +7,9 @@ import repository.SchemaConstraints
 import utils.GraphUtils
 import utils.Utilities
 import java.io.File
+import java.util.UUID
+
+
 
 fun main() {
     Logger.getLogger("org.apache").level = Level.WARN
@@ -52,9 +55,7 @@ fun main() {
         tweetsWithRetweetCounts,
         spark)
 
-    println(tweetsAboveThreshold.count())
-
-    val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
+    val connection = Neo4jConnection("", "neo4j", "")
     val graphRepository = GraphRepositoryImpl(connection.getDriver())
     val schemaConstraints = SchemaConstraints(connection.getDriver())
 
@@ -81,7 +82,9 @@ fun main() {
                 .map { fr -> Utilities.rowToParsedRetweet(fr) }
                 .forEachIndexed {index, fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text.replace("\"",""), "RETWEET")
+                    graphRepository.createTweetNode(fr.id, fr.created_at,
+                        fr.text.replace("\"",""),
+                        "RETWEET")
                     if (index == 0) {
                         graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     } else {
@@ -89,7 +92,7 @@ fun main() {
                             .map { fr -> Utilities.rowToParsedRetweet(fr) }[index - 1]
                         graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
                     }
-                    graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
+//                    graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
 
@@ -97,7 +100,9 @@ fun main() {
                 .map { fr -> Utilities.rowToParsedReply(fr) }
                 .forEach { fr ->
                     graphRepository.createUserNode(fr.user_id, fr.user_screen_name)
-                    graphRepository.createTweetNode(fr.id, fr.created_at, fr.text.replace("\"",""), "IN_REPLY_TO")
+                    graphRepository.createTweetNode(fr.id, fr.created_at,
+                        fr.text.replace("\"",""),
+                        "IN_REPLY_TO")
                     graphRepository.createRepliedToRelationship(fr.id, fr.in_reply_to_status_id)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
@@ -107,7 +112,8 @@ fun main() {
                     File("data/user_followers/${it.user_screen_name}.json")
                         .useLines { f -> f.toList() }
                 followers.forEach { f ->
-                    graphRepository.createUserNode(1L, f)
+                    graphRepository.createUserNode(
+                        UUID.randomUUID().mostSignificantBits and java.lang.Long.MAX_VALUE, f)
                     graphRepository.createFollowsRelationship(f, it.user_screen_name)
                 }
 
