@@ -20,4 +20,5 @@ dependencies {
     // Spark
     compile(group="org.apache.spark", name="spark-core_2.12", version= "2.4.0")
     compile(group="org.apache.spark", name="spark-sql_2.12", version= "2.4.0")
+    compile(group="org.twitter4j", name= "twitter4j-core", version="4.0.7")
 }

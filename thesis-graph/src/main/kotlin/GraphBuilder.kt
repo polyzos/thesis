@@ -55,7 +55,7 @@ fun main() {
         tweetsWithRetweetCounts,
         spark)
 
-    val connection = Neo4jConnection("", "neo4j", "")
+    val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
     val graphRepository = GraphRepositoryImpl(connection.getDriver())
     val schemaConstraints = SchemaConstraints(connection.getDriver())
 
@@ -64,7 +64,7 @@ fun main() {
     schemaConstraints.createConstraints()
 
 
-    tweetsAboveThreshold.collectAsList()
+    tweetsAboveThreshold.collectAsList().take(5)
         .map { Utilities.rowToParsedTweet(it) }
         .forEach {
             // foreach post find its retweets

@@ -11,7 +11,7 @@ class SchemaConstraints(private val driver: Driver) {
     }
 
     internal fun createConstraints() {
-        createUserConstraints()
+//        createUserConstraints()
         createTweetConstraints()
     }
 

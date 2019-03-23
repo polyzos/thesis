@@ -61,9 +61,9 @@ class GraphRepositoryImpl(private val driver: Driver): GraphRepository {
                             MERGE (f1:User {screen_name: '$follower'})
                             MERGE (f2:User {screen_name: '$followee'})
                             MERGE (f1)-[:FOLLOWS]->(f2)
-                            RETURN f1.screen_name, f2.screen_name""",
+                            RETURN f1.screen_name""",
                         Values.parameters("follower", follower, "followee", followee)
-                    ).single().get(0)
+                    ).peek()
                 }
 
         } catch (e: Throwable) {
@@ -119,8 +119,7 @@ class GraphRepositoryImpl(private val driver: Driver): GraphRepository {
                             RETURN u.id, p.id
                             """,
                         Values.parameters("screen_name", screenName, "id", id)
-                    )
-                        .single().get(0)
+                    ).single().get(0)
                 }
         } catch (e: Throwable) {
             println("Failed txn in createRetweetedRelationship: $e")
