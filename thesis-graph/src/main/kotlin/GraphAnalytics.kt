@@ -4,62 +4,36 @@ import repository.Neo4jConnection
 import twitter4j.TwitterException
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
+import java.io.File
+import java.util.*
 
 
 fun main() {
-    val cb = ConfigurationBuilder()
-    cb.setDebugEnabled(true)
-        .setOAuthConsumerKey("")
-        .setOAuthConsumerSecret("")
-        .setOAuthAccessToken("")
-        .setOAuthAccessTokenSecret("")
-    val tf = TwitterFactory(cb.build())
-    val twitter = tf.instance
-
-
-    val connection = Neo4jConnection("bolt://:7687",
-        "neo4j",
-        "")
+    val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
     try {
         val users = connection.getDriver().session()
             .writeTransaction {
                 it.run(
                     """MATCH (user: User) RETURN user.screen_name"""
-                ).list()
+                ).list().map { it.values()[0].toString().replace("\"", "") }
             }
 
-        users.forEach { user1 ->
-            println("Scanning for user: $user1")
-            users.forEach { user2 ->
-                if (user1.values()[0].toString() != user2.values()[0].toString()) {
-                    try {
-                        val isFollower= twitter.showFriendship(user1.values()[0].toString()
-                            .replace("\"", ""),
-                            user2.values()[0].toString().replace("\"", ""))
-                        if(isFollower.isSourceFollowingTarget) {
-                            println(user1.values()[0].toString()
-                                .replace("\"", "") + " FOLLOWS " + user2.values()[0].toString()
-                                .replace("\"", ""))
-                            createFollowsRelationship(user1.values()[0].toString()
-                                .replace("\"", ""),
-                                user2.values()[0].toString()
-                                    .replace("\"", ""), connection.getDriver())
-                        }
-                        if (isFollower.rateLimitStatus.remaining - 1 == 0) {
-                            println("Rate Limit Exceeded.")
-                            Thread.sleep(15 * 60 * 1000)
-                        }
-                    } catch (t: TwitterException) {
-                        println("Failed to retrieve info for user: $t")
-                    }
+        users.forEach {
+            if (File("data/user_followers/$it.json").exists()) {
+                println("Retrieving followers for user: $it")
+                val followers = File("data/user_followers/$it.json")
+                    .useLines { f -> f.toList() }
+                println("User '$it' has ${followers.size} followers.")
+                followers.forEach { follower ->
+                    createFollowsRelationship(follower, it, connection.getDriver())
                 }
+            } else {
+                println("Failed to retrieve followers for user $it")
             }
         }
-
     } catch (e: Throwable) {
         println("Failed to retrieve all user nodes: $e")
     }
-
 }
 
 fun createFollowsRelationship(follower: String, followee: String, driver: Driver) {
@@ -70,7 +44,7 @@ fun createFollowsRelationship(follower: String, followee: String, driver: Driver
                     MATCH (user1: User), (user2: User)
                     WHERE user1.screen_name='$follower' and user2.screen_name='$followee'
                     MERGE (user1)-[f: FOLLOWS]->(user2)
-                    RETURN user1, user2, f""").peek()
+                    RETURN user1, user2, f""").summary()
             }
 
     } catch (e: Throwable) {
