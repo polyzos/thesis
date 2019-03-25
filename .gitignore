@@ -28,6 +28,10 @@ hs_err_pid*
 .DS_STORE
 /build
 
+thesis-crawler/.idea
+thesis-crawler/project
+thesis-crawler/target
+
 thesis-etl/build
 thesis-etl/.idea
 thesis-etl/.gradle

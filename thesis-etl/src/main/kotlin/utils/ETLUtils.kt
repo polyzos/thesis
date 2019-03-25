@@ -17,27 +17,22 @@ object ETLUtils {
             .option("header", "true")
             .option("inferSchema", "true")
             .load(pathPrefix + fakeTweets)
-        .coalesce(2)
 
         val fakeTweetsDataWithFields = fieldExtractor(fakeTweetsData)
         val fakeTweetsDataFlattened = flattenTweetUser(fakeTweetsDataWithFields)
-        fakeTweetsDataFlattened.persist(StorageLevel.MEMORY_AND_DISK())
 
         val sampleTweetsStreamData = spark.read().format("json")
             .option("header", "true")
             .option("inferSchema", "true")
             .load(pathPrefix + sampleTweetsStream)
-            .coalesce(5)
 
         val sampleTweetsStreamDataWithFields = fieldExtractor(sampleTweetsStreamData)
         val sampleTweetsStreamDataFlattened = flattenTweetUser(sampleTweetsStreamDataWithFields)
-        sampleTweetsStreamDataFlattened.persist(StorageLevel.MEMORY_AND_DISK())
 
         val retweetsBatchData = spark.read().format("json")
             .option("header", "true")
             .option("inferSchema", "true")
             .load(pathPrefix + retweetsBatch)
-            .coalesce(2)
 
         val tweets1 = extractTweetPosts(fakeTweetsDataFlattened)
             .drop(    "in_reply_to_screen_name", "in_reply_to_status_id", "in_reply_to_user_id","retweeted_status")
@@ -202,7 +197,7 @@ object ETLUtils {
     }
 
     private fun saveToDisk(data: Dataset<Row>, outputPath: String, mode: SaveMode = SaveMode.Append) {
-        data.coalesce(1)
+        data
             .write()
             .format("json")
             .mode(mode)
