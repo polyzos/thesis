@@ -9,28 +9,45 @@ import java.util.*
 
 
 fun main() {
+    val cb = ConfigurationBuilder()
+    cb.setDebugEnabled(true)
+        .setOAuthConsumerKey("")
+        .setOAuthConsumerSecret("")
+        .setOAuthAccessToken("")
+        .setOAuthAccessTokenSecret("")
+    val tf = TwitterFactory(cb.build())
+    val twitter = tf.instance
+
     val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
     try {
         val users = connection.getDriver().session()
             .writeTransaction {
                 it.run(
                     """MATCH (user: User) RETURN user.screen_name"""
-                ).list().map { it.values()[0].toString().replace("\"", "") }
+                ).list().map { r -> r.values()[0].toString().replace("\"", "") }
             }
 
+        println(users.size)
+        var count = 0
         users.forEach {
             if (File("data/user_followers/$it.json").exists()) {
-                println("Retrieving followers for user: $it")
-                val followers = File("data/user_followers/$it.json")
-                    .useLines { f -> f.toList() }
-                println("User '$it' has ${followers.size} followers.")
-                followers.forEach { follower ->
-                    createFollowsRelationship(follower, it, connection.getDriver())
-                }
-            } else {
-                println("Failed to retrieve followers for user $it")
+                count += 1
             }
         }
+        println(count)
+//        users.forEach {
+//            if (File("data/user_followers/$it.json").exists()) {
+//                println("Retrieving followers for user: $it")
+//                val followers = File("data/user_followers/$it.json")
+//                    .useLines { f -> f.toList() }
+//                println("User '$it' has ${followers.size} followers.")
+//                followers.forEach { follower ->
+//                    createFollowsRelationship(follower, it, connection.getDriver())
+//                }
+//            } else {
+//                println("Failed to retrieve followers for user $it")
+//            }
+//        }
     } catch (e: Throwable) {
         println("Failed to retrieve all user nodes: $e")
     }

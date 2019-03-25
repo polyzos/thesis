@@ -1,15 +1,13 @@
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession
 import repository.GraphRepositoryImpl
 import repository.Neo4jConnection
 import repository.SchemaConstraints
 import utils.GraphUtils
 import utils.Utilities
-import java.io.File
-import java.util.UUID
-
-
 
 fun main() {
     Logger.getLogger("org.apache").level = Level.WARN
@@ -49,7 +47,7 @@ fun main() {
      * */
     tweetsWithRetweetCounts.describe().show()
 
-    // Keep tweets with more that 10 retweets
+    // Keep tweets with more than 10 retweets
     val tweetsAboveThreshold = GraphUtils.retrieveTweetsAboveThreshold(
         10,
         tweetsWithRetweetCounts,
@@ -63,8 +61,7 @@ fun main() {
     schemaConstraints.dropAll()
     schemaConstraints.createConstraints()
 
-
-    tweetsAboveThreshold.collectAsList().take(5)
+    tweetsAboveThreshold.collectAsList()
         .map { Utilities.rowToParsedTweet(it) }
         .forEach {
             // foreach post find its retweets
@@ -92,7 +89,6 @@ fun main() {
                             .map { fr -> Utilities.rowToParsedRetweet(fr) }[index - 1]
                         graphRepository.createRetweetedFromRelationship(fr.id, previous.id, fr.created_at)
                     }
-//                    graphRepository.createRetweetedFromRelationship(fr.id, fr.retweeted_status_id, fr.created_at)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
 
@@ -106,24 +102,59 @@ fun main() {
                     graphRepository.createRepliedToRelationship(fr.id, fr.in_reply_to_status_id)
                     graphRepository.createRetweetedRelationship(fr.user_screen_name, fr.id)
                 }
-
-            if (File("data/user_followers/${it.user_screen_name}.json").exists()) {
-                val followers =
-                    File("data/user_followers/${it.user_screen_name}.json")
-                        .useLines { f -> f.toList() }
-                followers.forEach { f ->
-                    graphRepository.createUserNode(
-                        UUID.randomUUID().mostSignificantBits and java.lang.Long.MAX_VALUE, f)
-                    graphRepository.createFollowsRelationship(f, it.user_screen_name)
-                }
-
-            } else {
-                println("Failed to retrieve followers for user ${it.user_screen_name}")
-            }
         }
 
     println("Saved records to the database.")
 
     connection.close()
     spark.close()
+}
+
+private val twitterAccounts = listOf("BreitbartNews",
+    "TheOnion",
+    "politicususa",
+    "TheBlaze_Prod",
+    "beforeitsnews",
+    "OccupyDemocrats",
+    "redflag_RBLX",
+    "DCClothesline",
+    "Bipartisanism",
+    "worldnetdaily",
+    "21WIRE",
+    "ActivistPost",
+    "AmericanNewsLLC",
+    "AmplifyingG",
+    "ChristWire",
+    "ChronicleLive",
+    "ClickHole",
+    "conscious_news",
+    "disclosetv",
+    "CRG_CRM",
+    "LibAmericaOrg",
+    "NewsBiscuit",
+    "WorldTruthTV"
+)
+
+
+internal fun insights(tweetsAboveThreshold: Dataset<Row>, spark: SparkSession) {
+    tweetsAboveThreshold.createOrReplaceTempView("tat")
+    val names = spark.sql(
+        """
+            SELECT DISTINCT(user_screen_name)
+            FROM tat
+        """.trimIndent()
+    )
+    println(names.count())
+    names.collectAsList().map { it.getString(0) }.forEach {
+        println(it + " -- " + twitterAccounts.contains(it))
+    }
+    println(tweetsAboveThreshold.count())
+
+    spark.sql(
+        """
+            SELECT COUNT(user_screen_name) as total, user_screen_name
+            FROM tat
+            GROUP BY user_screen_name
+        """.trimIndent()
+    ).show(20)
 }
