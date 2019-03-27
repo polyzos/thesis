@@ -28,8 +28,8 @@ object GraphUtils {
                 """)
     }
 
-    internal fun retrieveTweetsAboveThreshold(threshold: Int, data: Dataset<Row>, spark: SparkSession): Dataset<Row> {
-        data.filter("count > $threshold")
+    internal fun retrieveTweetsAboveThreshold(lowerBound: Int, upperBound: Int, data: Dataset<Row>, spark: SparkSession): Dataset<Row> {
+        data.filter("count > $lowerBound and count < $upperBound")
             .createOrReplaceTempView("tweetsWithRetweets")
 
         return spark.sql(

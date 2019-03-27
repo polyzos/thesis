@@ -27,14 +27,13 @@ fun main() {
                 ).list().map { r -> r.values()[0].toString().replace("\"", "") }
             }
 
-        println(users.size)
         var count = 0
         users.forEach {
             if (File("data/user_followers/$it.json").exists()) {
                 count += 1
             }
         }
-        println(count)
+
 //        users.forEach {
 //            if (File("data/user_followers/$it.json").exists()) {
 //                println("Retrieving followers for user: $it")

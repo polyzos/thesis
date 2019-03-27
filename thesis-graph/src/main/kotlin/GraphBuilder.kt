@@ -49,10 +49,12 @@ fun main() {
 
     // Keep tweets with more than 10 retweets
     val tweetsAboveThreshold = GraphUtils.retrieveTweetsAboveThreshold(
-        10,
+        20, 50,
         tweetsWithRetweetCounts,
         spark)
 
+    println(tweetsAboveThreshold.count())
+    insights(tweetsAboveThreshold, spark)
     val connection = Neo4jConnection("bolt://localhost:7687", "neo4j", "12345")
     val graphRepository = GraphRepositoryImpl(connection.getDriver())
     val schemaConstraints = SchemaConstraints(connection.getDriver())
