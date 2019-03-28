@@ -14,34 +14,11 @@ import java.util.*
 
 
 fun main() {
-    val cb = ConfigurationBuilder()
-    cb.setDebugEnabled(true)
-        .setOAuthConsumerKey("")
-        .setOAuthConsumerSecret("")
-        .setOAuthAccessToken("")
-        .setOAuthAccessTokenSecret("")
-    val tf = TwitterFactory(cb.build())
-    val twitter1 = tf.instance
+//    val twitter1 = getTwitterClient("", "", "", "")
+//    val twitter2 = getTwitterClient("", "", "", "")
+//    val twitter3 = getTwitterClient("", "", "", "")
 
-    val cb2 = ConfigurationBuilder()
-    cb2.setDebugEnabled(true)
-        .setOAuthConsumerKey("")
-        .setOAuthConsumerSecret("")
-        .setOAuthAccessToken("")
-        .setOAuthAccessTokenSecret("")
-    val tf2 = TwitterFactory(cb2.build())
-    val twitter2 = tf2.instance
-
-    val cb3 = ConfigurationBuilder()
-    cb3.setDebugEnabled(true)
-        .setOAuthConsumerKey("")
-        .setOAuthConsumerSecret("")
-        .setOAuthAccessToken("")
-        .setOAuthAccessTokenSecret("")
-    val tf3 = TwitterFactory(cb3.build())
-    val twitter3 = tf3.instance
-
-    val connection = Neo4jConnection("bolt://:7687", "neo4j", "")
+    val connection = Neo4jConnection("bolt://7687", "neo4j", "")
     try {
         val users = connection.getDriver().session()
             .writeTransaction {
@@ -52,38 +29,45 @@ fun main() {
 
         println(users.size)
 
-        val chunk1 = users.chunked(154)[0]
-        val chunk2 = users.chunked(154)[1]
-        val chunk3 = users.chunked(154)[2]
-        val chunk4 = users.chunked(154)[3]
+        val chunks = users.chunked(359)
+        val chunk1 = chunks[0]
+        val chunk2 = chunks[1]
+        val chunk3 = chunks[2]
+        val chunk4 = chunks[3]
+        val chunk5 = chunks[4]
+        val chunk6 = chunks[5]
+        val chunk7 = chunks[6]
         println(chunk1.size)
         println(chunk2.size)
         println(chunk3.size)
         println(chunk4.size)
-        val chunk1Thread = object: Thread(){
-            override fun run(){
-                retrieveUserRelationship(chunk1, twitter1, "data/follows_chunk1.txt")
-            }
-        }
-        val chunk2Thread = object: Thread(){
-            override fun run(){
-                retrieveUserRelationship(chunk2, twitter2, "data/follows_chunk2.txt")
-            }
-        }
-        val chunk3Thread = object: Thread(){
-            override fun run(){
-                retrieveUserRelationship(chunk3, twitter3, "data/follows_chunk3.txt")
-            }
-        }
-
-        chunk1Thread.start()
-        chunk2Thread.start()
-        chunk3Thread.start()
-
-        chunk1Thread.join()
-        chunk2Thread.join()
-        chunk3Thread.join()
-        retrieveUserRelationship(chunk4, twitter3, "data/follows_chunk4.txt")
+        println(chunk5.size)
+        println(chunk6.size)
+        println(chunk7.size)
+//        val chunk1Thread = object: Thread(){
+//            override fun run(){
+//                retrieveUserRelationship(chunk1, twitter1, "data/follows_chunk1.txt")
+//            }
+//        }
+//        val chunk2Thread = object: Thread(){
+//            override fun run(){
+//                retrieveUserRelationship(chunk2, twitter2, "data/follows_chunk2.txt")
+//            }
+//        }
+//        val chunk3Thread = object: Thread(){
+//            override fun run(){
+//                retrieveUserRelationship(chunk3, twitter3, "data/follows_chunk3.txt")
+//            }
+//        }
+//
+//        chunk1Thread.start()
+//        chunk2Thread.start()
+//        chunk3Thread.start()
+//
+//        chunk1Thread.join()
+//        chunk2Thread.join()
+//        chunk3Thread.join()
+//        retrieveUserRelationship(chunk4, twitter3, "data/follows_chunk4.txt")
 
     } catch (e: Throwable) {
         println("Failed to retrieve all user nodes: $e")
@@ -104,6 +88,20 @@ fun createFollowsRelationship(follower: String, followee: String, driver: Driver
     } catch (e: Throwable) {
         println("Failed txn in createFollowsRelationship: $e")
     }
+}
+
+fun getTwitterClient(consumerKey: String,
+                     consumerSecret: String,
+                     accessKey:String,
+                     accessTokenSecret: String): Twitter {
+    val cb = ConfigurationBuilder()
+    cb.setDebugEnabled(true)
+        .setOAuthConsumerKey(consumerKey)
+        .setOAuthConsumerSecret(consumerSecret)
+        .setOAuthAccessToken(accessKey)
+        .setOAuthAccessTokenSecret(accessTokenSecret)
+    val tf = TwitterFactory(cb.build())
+    return tf.instance
 }
 
 fun retrieveUserRelationship(users: List<String>, twitter: Twitter, filename: String) {
