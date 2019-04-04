@@ -16,7 +16,7 @@ interface GraphRepository {
 
     fun createRetweetedRelationship(screenName: String, id: Long)
 
-    fun createRepliedToRelationship(tweetId: Long, replyId: Long)
+    fun createRepliedToRelationship(tweetId: Long, replyId: Long, created_at: Date)
 
     fun createRetweetedFromRelationship(tweetId: Long, retweetId: Long, created_at: Date)
 

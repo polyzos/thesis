@@ -37,7 +37,7 @@ object GraphUtils {
             SELECT *
             FROM tweets
             WHERE id IN (SELECT id FROM tweetsWithRetweets)
-        """.trimIndent())
+            """.trimIndent())
     }
 
     internal fun retrieveTweetsWithRetweetCounts(spark: SparkSession): Dataset<Row> {
@@ -67,6 +67,7 @@ object GraphUtils {
                 SELECT *
                 FROM replies
                 WHERE in_reply_to_status_id=$replyId
+                ORDER BY created_at
                 """)
     }
 

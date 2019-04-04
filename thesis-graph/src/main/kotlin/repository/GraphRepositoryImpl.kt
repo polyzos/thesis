@@ -126,15 +126,15 @@ class GraphRepositoryImpl(private val driver: Driver): GraphRepository {
         }
     }
 
-    override fun createRepliedToRelationship(tweetId: Long, replyId: Long) {
+    override fun createRepliedToRelationship(replyId: Long, tweetId: Long, created_at: Date) {
         try {
             driver.session()
                 .writeTransaction {
                     it.run(
                         """
-                            MATCH (p1:Tweet {id: $tweetId})
-                            MATCH (p2:Tweet {id: $replyId})
-                            MERGE (p1)-[:REPLIED_TO]->(p2)
+                            MATCH (p1:Tweet {id: $replyId})
+                            MATCH (p2:Tweet {id: $tweetId})
+                            MERGE (p1)-[:REPLIED_TO {timestamp: '$created_at'}]->(p2)
                             RETURN p1.id, p2.id
                             """,
                         Values.parameters("tweetId", tweetId, "replyId", replyId)
