@@ -11,7 +11,7 @@ class SchemaConstraints(private val driver: Driver) {
     }
 
     internal fun createConstraints() {
-//        createUserConstraints()
+        createUserConstraints()
         createTweetConstraints()
     }
 
@@ -20,7 +20,7 @@ class SchemaConstraints(private val driver: Driver) {
             println("Adding a constraint for :User")
             driver.session()
                 .writeTransaction {
-                    it.run("CREATE CONSTRAINT ON (user:User) ASSERT user.screen_name IS UNIQUE")
+                    it.run("CREATE CONSTRAINT ON (user:User) ASSERT user.id IS UNIQUE")
                 }
         } catch (e: Throwable) {
             println("Failed adding constraint on user: $e")
@@ -43,7 +43,7 @@ class SchemaConstraints(private val driver: Driver) {
         try {
             driver.session()
                 .writeTransaction {
-                    it.run("DROP CONSTRAINT ON (user:User) ASSERT user.screen_name IS UNIQUE")
+                    it.run("DROP CONSTRAINT ON (user:User) ASSERT user.id IS UNIQUE")
                 }
         } catch (e: Throwable) {
             println("Failed dropping constraints on user: $e")

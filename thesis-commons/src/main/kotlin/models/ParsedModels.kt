@@ -41,3 +41,10 @@ data class ParsedReply(
     val user_id: Long,
     val user_screen_name: String
 )
+
+data class ParsedUser(
+    val id: Long,
+    val screen_name: String,
+    val followers_count: Long,
+    val friends_count: Long
+)
