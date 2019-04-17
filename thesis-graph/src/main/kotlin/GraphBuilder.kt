@@ -103,23 +103,17 @@ fun main() {
                     nodeRepository.createReplyNode(reply)
 
                     relationshipRepository.createRepliedRelationship(replyUser, reply)
-//                    graphRepository.createUserNode(tweet.user_id, tweet.user_screen_name)
-//                    graphRepository.createTweetNode(tweet.id, tweet.created_at, tweet.text.replace("\"",""), "REPLY")
                     if (index == 0) {
                         relationshipRepository.createRepliedToRelationship(it.id, reply)
-//                        graphRepository.createRepliedToRelationship(tweet.id, tweet.in_reply_to_status_id, tweet.created_at)
                     } else {
                         if (fetchedReactions[index - 1].size() == 10) {
                             val previous = Utilities.rowToParsedReply(fetchedReactions[index - 1])
                             relationshipRepository.createRepliedToRelationship(previous.id, reply)
-//                            graphRepository.createRepliedToRelationship(tweet.id, previous.id, tweet.created_at)
                         } else {
                             val previous = Utilities.rowToParsedRetweet(fetchedReactions[index - 1])
                             relationshipRepository.createRepliedToRelationship(previous.id, reply)
-//                            graphRepository.createRepliedToRelationship(tweet.id, previous.id, tweet.created_at)
                         }
                     }
-//                    graphRepository.createTweetedRelationship(tweet.user_screen_name, tweet.id)
                 } else {
                     val retweet = Utilities.rowToParsedRetweet(fr)
                     val retweetUser = ParsedUser(retweet.id, retweet.user_screen_name, retweet.user_followers_count, retweet.user_friends_count)
@@ -129,23 +123,17 @@ fun main() {
 
                     relationshipRepository.createRetweetedRelationship(retweetUser, retweet)
 
-//                    graphRepository.createUserNode(tweet.user_id, tweet.user_screen_name)
-//                    graphRepository.createTweetNode(tweet.id, tweet.created_at, tweet.text.replace("\"",""), "RETWEET")
                     if (index == 0) {
                         relationshipRepository.createRetweetedFromRelationship(it.id, retweet)
-//                        graphRepository.createRetweetedFromRelationship(tweet.id, tweet.retweeted_status_id, tweet.created_at)
                     } else {
                         if (fetchedReactions[index - 1].size() == 10) {
                             val previous = Utilities.rowToParsedReply(fetchedReactions[index - 1])
                             relationshipRepository.createRetweetedFromRelationship(previous.id, retweet)
-//                            graphRepository.createRepliedToRelationship(tweet.id, previous.id, tweet.created_at)
                         } else {
                             val previous = Utilities.rowToParsedRetweet(fetchedReactions[index - 1])
                             relationshipRepository.createRetweetedFromRelationship(previous.id, retweet)
-//                            graphRepository.createRepliedToRelationship(tweet.id, previous.id, tweet.created_at)
                         }
                     }
-//                    graphRepository.createRetweetedRelationship(tweet.user_screen_name, tweet.id)
                 }
 
             }
