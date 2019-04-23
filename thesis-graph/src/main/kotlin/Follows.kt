@@ -3,7 +3,7 @@ import repository.Neo4jConnection
 import java.io.File
 
 fun main() {
-    val connection = Neo4jConnection("")
+    val connection = Neo4jConnection("bolt://localhost:7687")
 
     (1 .. 10).toList().forEach {
         File("data/follows_chunk$it.txt").readLines().forEach { line ->

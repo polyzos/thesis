@@ -47,3 +47,5 @@ thesis-graph/.DS_Store
 thesis-graph/build
 
 thesis-commons/out
+
+.ipynb_checkpoints
