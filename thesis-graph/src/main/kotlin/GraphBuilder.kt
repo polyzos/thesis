@@ -77,6 +77,8 @@ fun main() {
             val fetchedReplies = GraphUtils.findPostReplies(it.id, spark)
             val user = ParsedUser(it.user_id, it.user_screen_name, it.user_followers_count, it.user_friends_count)
             println("Tweet ${it.id} has ${fetchedRetweets.count()} retweets and ${fetchedReplies.count()} replies.")
+//            println(it.id)
+//            println(it.user_id)
 
             // Store tweet in the database
 //            graphRepository.createUserNode(it.user_id, it.user_screen_name)
@@ -98,7 +100,8 @@ fun main() {
                 if (fr.size() == 10) {
                     val reply = Utilities.rowToParsedReply(fr)
                     val replyUser = ParsedUser(reply.user_id, reply.user_screen_name, reply.user_followers_count, reply.user_friends_count)
-
+//                    println(reply.id)
+//                    println(reply.user_id)
                     nodeRepository.createUserNode(replyUser)
                     nodeRepository.createReplyNode(reply)
 
