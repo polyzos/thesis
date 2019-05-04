@@ -15,7 +15,11 @@ import java.nio.file.StandardOpenOption
 
 
 fun main() {
-    val twitter1 = getTwitterClient("CRQ2F7OVCnlw4s8Q6VWt4MYfG", "u9WQECaSRutSNdYD84qP4SMUs2wUl4U1tnb9iqY0fFJdg1JTF3", "405836734-jFnYURTXVLsdxMnK4ME51M0srDMl3s3RRYWazKXG", "DL2RITe7G5Xg0NYtHPJo38zC09NJ1alwtL6wcBIN2hx4x")
+    val twitter1 = getTwitterClient(
+        "CRQ2F7OVCnlw4s8Q6VWt4MYfG",
+        "u9WQECaSRutSNdYD84qP4SMUs2wUl4U1tnb9iqY0fFJdg1JTF3",
+        "405836734-jFnYURTXVLsdxMnK4ME51M0srDMl3s3RRYWazKXG",
+        "DL2RITe7G5Xg0NYtHPJo38zC09NJ1alwtL6wcBIN2hx4x")
 
     val connection = Neo4jConnection("bolt://localhost:7687", "", "")
     val listOfIds = listOf(1109973027255664643,
