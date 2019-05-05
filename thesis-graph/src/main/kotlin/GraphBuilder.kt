@@ -135,7 +135,7 @@ internal fun createGraph(tweetStories: List<ParsedTweet>,
                          spark: SparkSession) {
 
     val connection = Neo4jConnection(
-        "bolt://thesis.polyzos.dev:7687",
+        "bolt://localhost:7687",
         "neo4j",
         "thesis@2019!kontog"
     )
