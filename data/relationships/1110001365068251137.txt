@@ -1,4 +1,0 @@
-ParaInTheWorld,krankorwat,false
-NormalCaptain,krankorwat,false
-Linsley71,krankorwat,false
-bl4cklodge,krankorwat,false

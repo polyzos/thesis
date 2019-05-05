@@ -58,6 +58,7 @@ fun main() {
         .load("data/output/replies.json")
 
     tweets.createOrReplaceTempView("tweets")
+
     retweets.withColumnRenamed("id", "retweet_id")
         .createOrReplaceTempView("retweets")
     replies.createOrReplaceTempView("replies")
@@ -79,12 +80,11 @@ fun main() {
         tweetsWithRetweetCounts,
         spark)
 
-    println(tweetsAboveThreshold.count())   // 41 stories
-    insights(tweetsAboveThreshold, spark)
+//    insights(tweetsAboveThreshold, spark)
 
+    val tweetsSample = retrieveSubsetOfStories(tweetsAboveThreshold, 16)
 
-    val tweetsSample = retrieveSubsetOfStories(tweetsAboveThreshold)
-    createGraph(tweetsSample, spark)
+//    createGraph(tweetsSample, spark)
 
     spark.close()
 }
@@ -93,17 +93,23 @@ fun main() {
 internal fun retrieveSubsetOfStories(tweetsAboveThreshold: Dataset<Row>,
                                      threshold: Int = 10): MutableList<ParsedTweet> {
 
-    val names = mutableListOf<String>()
     val tweetsSample = mutableListOf<ParsedTweet>()
 
-    tweetsAboveThreshold.collectAsList()
+    val parsed = tweetsAboveThreshold.collectAsList()
         .map { Utilities.rowToParsedTweet(it) }
-        .forEach {
-            if (!names.contains(it.user_screen_name) && names.size < threshold) {
-                names.add(it.user_screen_name)
-                tweetsSample.add(it)
-            }
+
+    while(tweetsSample.size < threshold/2) {
+        val tweet= parsed.random()
+        if (twitterAccounts.contains(tweet.user_screen_name)) {
+            tweetsSample.add(tweet)
         }
+    }
+    while(tweetsSample.size < threshold) {
+        val tweet= parsed.random()
+        if (!twitterAccounts.contains(tweet.user_screen_name)) {
+            tweetsSample.add(tweet)
+        }
+    }
     return tweetsSample
 }
 
@@ -135,7 +141,7 @@ internal fun createGraph(tweetStories: List<ParsedTweet>,
                          spark: SparkSession) {
 
     val connection = Neo4jConnection(
-        "bolt://localhost:7687",
+        "bolt://thesis.polyzos.dev:7687",
         "neo4j",
         "thesis@2019!kontog"
     )
@@ -150,7 +156,6 @@ internal fun createGraph(tweetStories: List<ParsedTweet>,
     schemaConstraints.createConstraints()
 
     tweetStories
-        .filter { it.user_screen_name != "21WIRE" && it.user_screen_name != "BreitbartNews" }
         .forEach {
             // foreach post find its retweets
             val fetchedRetweets = GraphUtils.findPostRetweets(it.id, spark)

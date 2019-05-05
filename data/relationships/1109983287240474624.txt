@@ -1,3 +1,0 @@
-Famulator64,LuvilVEVO,false
-lesbiyot,LuvilVEVO,false
-gbranom106,LuvilVEVO,false
