@@ -13,10 +13,14 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
-
+val pathToRead = "data/relationships/eight/"
+val pathToWrite = ""
+val percentages = HashMap<Long, Double>()
 fun main() {
-    throughFiles()
 //    distinctValues()
+    throughFiles()
+    generateStats()
+
 //    val twitterConnections = listOf(
 //        getTwitterClient(
 //            "CRQ2F7OVCnlw4s8Q6VWt4MYfG",
@@ -229,9 +233,9 @@ fun retrieveUserRelationship(source: String,
 //}
 
 fun distinctValues() {
-    File("data/relationships/eight/").walk()
+    File("data/relationships/june/dirty/").walk()
         .forEach {
-            if (it.toString() != "data\\relationships\\eight") {
+            if (it.toString() != "data/relationships/june/dirty") {
                 val distinctValues = mutableSetOf<String>()
                 println(it)
                 it.forEachLine {
@@ -239,8 +243,8 @@ fun distinctValues() {
                 }
                 val id = it.toString()
                     .split(".")[0]
-                    .split("eight\\")[1].toLong()
-                val file = File("data/relationships/clean/$id.txt")
+                    .split("dirty/")[1].toLong()
+                val file = File("data/relationships/june/clean/$id.txt")
                 file.createNewFile()
                 distinctValues.forEach {
                     try {
@@ -253,18 +257,60 @@ fun distinctValues() {
         }
 }
 
+fun generateStats() {
+    val outputFile = File("data/relationships/june/stats.txt")
+    outputFile.createNewFile()
+    outputFile.appendText("id|\ttrue_count|\tfalse_count|\tnull_count|\trelationships_count|\tusers_following_origin_percentage\n")
+
+    File("data/relationships/june/clean").walk()
+        .forEach {
+            if (it.toString() != "data/relationships/june/clean") {
+                var lineCount = 0
+                var trueCount = 0
+                var falseCount = 0
+                var nullCount = 0
+                val id = it.toString()
+                    .split(".")[0]
+                    .split("clean/")[1]
+                it.forEachLine { r ->
+                    lineCount++
+                    val relation = r.split(",")[2]
+                    if (relation == "false") {
+                        falseCount++
+                    } else if (relation == "true") {
+                        trueCount++
+                    } else if (relation == "null") {
+                        nullCount++
+                    }
+                }
+
+                val perc = percentages.get(id.toLong())?.div(trueCount)?.times(100)
+
+                val toWrite = StringBuilder().append(id).append("|\t")
+                    .append(trueCount).append("|\t")
+                    .append(falseCount).append("|\t")
+                    .append(nullCount).append("|\t")
+                    .append(lineCount).append("|\t")
+                    .append(if (perc!!.isNaN()) "0" else String.format("%.2f", perc)).append("\n")
+                    .toString()
+                outputFile.appendText(toWrite)
+            }
+        }
+
+}
+
 fun throughFiles() {
 //    val filenames = ArrayList<File>()
 //    File("data/relationships/").walk().forEach { filenames.add(it) }
 //
 //    filenames.forEach{ it.forEachLine { println(it) }}
 
-    File("data/relationships/clean").walk()
+    File("data/relationships/june/clean").walk()
         .forEach {
-            if (it.toString() != "data\\relationships\\clean") {
+            if (it.toString() != "data/relationships/june/clean") {
                 val id = it.toString()
                     .split(".")[0]
-                    .split("clean\\")[1].toLong()
+                    .split("clean/")[1].toLong()
 
                 val connection = Neo4jConnection(
                     "bolt://thesis.polyzos.dev:7687",
@@ -283,12 +329,15 @@ fun throughFiles() {
                         }
 
                     val users = HashMap<String, ArrayList<String>>()
+                    val allUsersFromTweetChain = mutableSetOf<String>()
                     it.forEachLine { r ->
                         val split = r.split(",")
                         val source = split[0]
                         val target = split[1]
+                        allUsersFromTweetChain.add(source)
                         val followed = split[2]
                         if (followed == "true") {
+//                            println("Inside the statement")
                             if (users.containsKey(source)) {
                                 users[source]?.add(target)
                             } else {
@@ -302,6 +351,9 @@ fun throughFiles() {
                         .asMap()["starter"].toString()
                     val origin = results[0]
                         .asMap()["origin"].toString()
+                    val usersFollowingOriginCount = if (users[starter]?.size != null ) users[starter]!!.size.toDouble() else 0.toDouble()
+
+                    percentages.put(id, usersFollowingOriginCount)
                     val line = StringBuilder()
                         .append(starter)
                         .append(",")
@@ -316,7 +368,7 @@ fun throughFiles() {
                         }
                     }
                     line.append("]")
-                    val file = File("data/stories/eight/$id.txt")
+                    val file = File("data/relationships/june/follows/$id.txt")
                     file.createNewFile()
                     try {
                         file.appendText(line.toString() + "\n")
@@ -331,11 +383,12 @@ fun throughFiles() {
                             .append(",")
                             .append(timestamp)
                             .append(",[")
+
                         users[currentUser]?.forEachIndexed { index, e ->
                             if (index + 1 != users[currentUser]?.size) {
-                                line.append(e).append(",")
+                                l.append(e).append(",")
                             } else {
-                                line.append(e)
+                                l.append(e)
                             }
                         }
                         l.append("]")
