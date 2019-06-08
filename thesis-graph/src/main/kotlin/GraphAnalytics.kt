@@ -18,8 +18,9 @@ val pathToWrite = ""
 val percentages = HashMap<Long, Double>()
 fun main() {
 //    distinctValues()
-    throughFiles()
-    generateStats()
+//    throughFiles()
+//    generateStats()
+    userAppearancesInStories()
 
 //    val twitterConnections = listOf(
 //        getTwitterClient(
@@ -404,4 +405,48 @@ fun throughFiles() {
 
             }
         }
+}
+
+fun userAppearancesInStories() {
+    val pathToRead = "data/relationships/june/follows"
+    val pathToWrite = "data/relationships/june/appearances.txt"
+    val appearances = HashMap<String, MutableSet<String>>()
+
+    File(pathToRead).walk()
+        .forEach {
+            if (it.toString() != "data/relationships/june/follows") {
+                val id = it.toString()
+                    .split(".")[0]
+                    .split("follows/")[1]
+
+                it.forEachLine { line ->
+                    val user = line.split(",")[0]
+                    if (appearances.containsKey(user)) {
+                        appearances[user]?.add(id)
+                    } else {
+                        val tweetIDs = mutableSetOf<String>()
+                        tweetIDs.add(id)
+                        appearances.put(user, tweetIDs)
+                    }
+                }
+            }
+        }
+
+    val fileToWrite = File(pathToWrite)
+    fileToWrite.createNewFile()
+    appearances.forEach { (key, value) ->
+        if (value.size > 1) {
+            val builder = StringBuilder().append(key).append(",").append("[")
+            value.forEachIndexed { index, s ->
+                if (index + 1 == value.size) {
+                    builder.append(s)
+                } else {
+                    builder.append(s).append(",")
+                }
+            }
+            builder.append("]\n")
+            fileToWrite.appendText(builder.toString())
+        }
+    }
+
 }
