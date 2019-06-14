@@ -13,9 +13,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
-val pathToRead = "data/relationships/eight/"
-val pathToWrite = ""
-val percentages = HashMap<Long, Double>()
+private val pathToRead = "data/relationships/eight/"
+private val pathToWrite = ""
+private val percentages = HashMap<Long, Double>()
 fun main() {
 //    distinctValues()
 //    throughFiles()
@@ -414,7 +414,7 @@ fun userAppearancesInStories() {
 
     File(pathToRead).walk()
         .forEach {
-            if (it.toString() != "data/relationships/june/follows") {
+            if (it.toString() != pathToRead) {
                 val id = it.toString()
                     .split(".")[0]
                     .split("follows/")[1]
@@ -448,5 +448,4 @@ fun userAppearancesInStories() {
             fileToWrite.appendText(builder.toString())
         }
     }
-
 }
