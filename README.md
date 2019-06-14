@@ -60,7 +60,9 @@ We hold information about [retweets](#retweets) of tweets and [replies](#replies
 
 We, also, depict the relationship a user following another user with an edge tagged **:FOLLOWS** connecting two nodes, and an arrow pointing to the followed user node. 
 
+##### Example image of a network graph, showing the propagation of a tweet story.
 
+![Example of a network graph](1133089990576095232.png)
 ### 4. Graph Algorithms
 -----------------------   
 * TODO: Description about the graph algorithms
