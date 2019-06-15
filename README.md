@@ -1,4 +1,4 @@
-### Measure The Speed Of News Spread in Social Networks For Real-Time Fake News Detection
+## Measuring The Propagation Speed Of Information Spread In Social Networks For Real-Time Fake News Detection
 <br>
 
 ### Requirements:
