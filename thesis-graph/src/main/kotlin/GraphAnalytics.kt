@@ -13,82 +13,83 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
+private val folderName = "latest"
+private val percentages = HashMap<Long, Double>()
 
 fun main() {
-//    throughFiles()
-//    distinctValues()
-    val twitterConnections = listOf(
-        getTwitterClient(
-            "CRQ2F7OVCnlw4s8Q6VWt4MYfG",
-            "u9WQECaSRutSNdYD84qP4SMUs2wUl4U1tnb9iqY0fFJdg1JTF3",
-            "405836734-jFnYURTXVLsdxMnK4ME51M0srDMl3s3RRYWazKXG",
-            "DL2RITe7G5Xg0NYtHPJo38zC09NJ1alwtL6wcBIN2hx4x"),
-        getTwitterClient(
-            "RvltTntT8vLV8ePFwBgjxo06J",
-            "s6JkNrDXXr6wy1qgTG7Ye5bbpj1UJnKAeFifRi91WLWM9WAXma",
-            "405836734-fBNd3B0gSeBjwzgrdzZoE5l6HPcRvw8NUUfydrql",
-            "1uBZIm2aSnEKrkCKxj56JlJp9qhAfAVwlIOrDVFozv9iF"),
-        getTwitterClient(
-            "KkyWonRmpx5VwQ1Sfxklk6sQa",
-            "cmhEcEik8NV88CYNtG2Zo5znYfmOXeqIvjejgJMmH1qywF1wZE",
-            "405836734-wcwBggrItUUFagKmxeQ7ajGFX8G4L1PNKa7R0MY4",
-            "IgmDPxgan6GtknD8Er1pMrTTbw0I61SU8OImuTK5jFVgb"),
-        getTwitterClient(
-            "9D70vgeJJbywTZsOsMZm1YcWm",
-            "J23FpGHi7g3dCCw2fXzuzQsTs2wRpgYKkjY4WsmfFMqPSWXWpl",
-            "405836734-eWg9vCROosI3xzBAzI1vP5jSQFtPIqzt2jZltx3a",
-            "OEVPfNuROotS8ra3sCWmxPUn8NnTF8ZWxMl10qHOpZaLn"),
-        getTwitterClient(
-            "Xmhwq8UFXFXW6ZkMQTZPG5EXV",
-            "4XHkJ22CLLcUprrrSOTSZIcc4jkHlbI6Y6Imr9WNIZwJAYCEOo",
-            "405836734-1RmIVwot3q8AwFo0UKVVTsFtt7BsvAOEAybRYDuc",
-            "47OLiQhQcziDPSWffTHYJ1J0sMiWglIPe3x0oeTQS4s4b"),
-        getTwitterClient(
-            "oDpG0XZyBRQXQ00Z6KcxSqevF",
-            "RRTmb8sMJJfypi1zt62qWFGN4LvIjDoqY9GBUXX5FAIyyUg7lN",
-            "405836734-hOYHO86SvveQEfU0xw3OE09rOuUA9cAMhf4c1CXt",
-            "Pjn1Gq8erxxpSqBbe2GdVzLTiionTbtEgV4WpNjif5EiV"),
-        getTwitterClient(
-            "V1KBJLcDFWIz6APYWbh7SX4ue",
-            "yL9Up8cGdN8rAgvqVfwhPtOgtMB0u1qhjxRmibZlx0orOWD64I",
-            "405836734-mtXS4NpNwev3K2b9iJdZQNYHnjQ7gW9j247M3LOZ",
-            "McWNI1Nu3doXiYVjfhDaQJxYnp1CKOe8mOu5WcKHkYW51"),
-        getTwitterClient(
-            "DbVfIqKjf6SrMv5BuwQt15WcK",
-            "P31sb2irK0VkjhOunvG8HIG02X4pWP9sDc4umiFmEgQIB4b8xf",
-            "405836734-yRNu3OwvRra67PFB5mVAdifoXhac96OXYDfOUKdG",
-            "zgQ5bJyyG4835IUEkZnfsCG8dJIhpTuQf6Aq5lKJMn1K9")
-    )
+    distinctValues()
+    throughFiles()
+    generateStats()
+    userAppearancesInStories()
 
-    val connection = Neo4jConnection(
-        "bolt://thesis.polyzos.dev:7687",
-        "neo4j",
-        "thesis@2019!kontog"
-    )
+//    val twitterConnections = listOf(
+//        getTwitterClient(
+//            "CRQ2F7OVCnlw4s8Q6VWt4MYfG",
+//            "u9WQECaSRutSNdYD84qP4SMUs2wUl4U1tnb9iqY0fFJdg1JTF3",
+//            "405836734-jFnYURTXVLsdxMnK4ME51M0srDMl3s3RRYWazKXG",
+//            "DL2RITe7G5Xg0NYtHPJo38zC09NJ1alwtL6wcBIN2hx4x"),
+//        getTwitterClient(
+//        "RvltTntT8vLV8ePFwBgjxo06J",
+//        "s6JkNrDXXr6wy1qgTG7Ye5bbpj1UJnKAeFifRi91WLWM9WAXma",
+//        "405836734-fBNd3B0gSeBjwzgrdzZoE5l6HPcRvw8NUUfydrql",
+//        "1uBZIm2aSnEKrkCKxj56JlJp9qhAfAVwlIOrDVFozv9iF"),
+//        getTwitterClient(
+//        "KkyWonRmpx5VwQ1Sfxklk6sQa",
+//        "cmhEcEik8NV88CYNtG2Zo5znYfmOXeqIvjejgJMmH1qywF1wZE",
+//        "405836734-wcwBggrItUUFagKmxeQ7ajGFX8G4L1PNKa7R0MY4",
+//        "IgmDPxgan6GtknD8Er1pMrTTbw0I61SU8OImuTK5jFVgb"),
+//        getTwitterClient(
+//        "9D70vgeJJbywTZsOsMZm1YcWm",
+//        "J23FpGHi7g3dCCw2fXzuzQsTs2wRpgYKkjY4WsmfFMqPSWXWpl",
+//        "405836734-eWg9vCROosI3xzBAzI1vP5jSQFtPIqzt2jZltx3a",
+//        "OEVPfNuROotS8ra3sCWmxPUn8NnTF8ZWxMl10qHOpZaLn"),
+//        getTwitterClient(
+//            "Xmhwq8UFXFXW6ZkMQTZPG5EXV",
+//            "4XHkJ22CLLcUprrrSOTSZIcc4jkHlbI6Y6Imr9WNIZwJAYCEOo",
+//        "405836734-1RmIVwot3q8AwFo0UKVVTsFtt7BsvAOEAybRYDuc",
+//        "47OLiQhQcziDPSWffTHYJ1J0sMiWglIPe3x0oeTQS4s4b"),
+//        getTwitterClient(
+//        "oDpG0XZyBRQXQ00Z6KcxSqevF",
+//        "RRTmb8sMJJfypi1zt62qWFGN4LvIjDoqY9GBUXX5FAIyyUg7lN",
+//        "405836734-hOYHO86SvveQEfU0xw3OE09rOuUA9cAMhf4c1CXt",
+//        "Pjn1Gq8erxxpSqBbe2GdVzLTiionTbtEgV4WpNjif5EiV"),
+//        getTwitterClient(
+//        "V1KBJLcDFWIz6APYWbh7SX4ue",
+//        "yL9Up8cGdN8rAgvqVfwhPtOgtMB0u1qhjxRmibZlx0orOWD64I",
+//        "405836734-mtXS4NpNwev3K2b9iJdZQNYHnjQ7gW9j247M3LOZ",
+//        "McWNI1Nu3doXiYVjfhDaQJxYnp1CKOe8mOu5WcKHkYW51"),
+//        getTwitterClient(
+//        "DbVfIqKjf6SrMv5BuwQt15WcK",
+//        "P31sb2irK0VkjhOunvG8HIG02X4pWP9sDc4umiFmEgQIB4b8xf",
+//        "405836734-yRNu3OwvRra67PFB5mVAdifoXhac96OXYDfOUKdG",
+//        "zgQ5bJyyG4835IUEkZnfsCG8dJIhpTuQf6Aq5lKJMn1K9")
+//    )
 //
-//    val existing = File("data/relationships/june/clean").listFiles().map {
-//        it.toString().split("/").last().split(".")[0].toLong()
-//    }
-
-        val originalPostIds =  connection.getDriver().session()
-        .writeTransaction {
-            it.run(
-                """
-                    MATCH (tw:Tweet {type: "TWEET"}) RETURN tw.id
-                """.trimIndent()
-            ).list()
-        }.map { it[0].asLong() }
-//    val filtered = originalPostIds.filter { !existing.contains(it) }
-
-    val threads = originalPostIds.chunked(6)
-        .mapIndexed { index, stories ->
-            Thread {
-                processStories(stories,twitterConnections[index], connection)
-            }
-        }
-
-    threads.forEach { it.start() }
-    threads.forEach { it.join() }
+//    val connection = Neo4jConnection(
+//        "bolt://thesis.polyzos.dev:7687",
+//        "neo4j",
+//        "thesis@2019!kontog"
+//    )
+//
+//    val originalPostIds =  connection.getDriver().session()
+//        .writeTransaction {
+//            it.run(
+//                """
+//                    MATCH (tw:Tweet {type: "TWEET"}) RETURN tw.id
+//                """.trimIndent()
+//            ).list()
+//        }.map { it[0].asLong() }
+//
+//
+//    val threads = originalPostIds.chunked(2)
+//        .mapIndexed { index, stories ->
+//            Thread {
+//                processStories(stories,twitterConnections[index],connection)
+//            }
+//        }
+//
+//    threads.forEach { it.start() }
+//    threads.forEach { it.join() }
 }
 
 fun processStories(storyIds: List<Long>, twitter: Twitter, connection: Neo4jConnection) {
@@ -113,7 +114,7 @@ fun processStoryChain(id: Long, twitter: Twitter, connection: Neo4jConnection) {
         }.toMutableList()
         storyUsers.add(result[0][2].asString())
 
-        val file = File("data/relationships/$id.txt")
+        val file = File("data/relationships/eight/$id.txt")
         if (!file.exists()) {
             file.createNewFile()
         }
@@ -161,17 +162,16 @@ fun retrieveUserRelationship(source: String,
         requestResult = twitter.friendsFollowers().showFriendship(source, target)
     } catch (e: TwitterException) {
         println("---- Something went wrong when retrieving relationship ----")
-        println(e)
-
     }
     val isSourceFollowedByTarget= requestResult?.isSourceFollowedByTarget
     val  isTargetFollowedBySource= requestResult?.isTargetFollowedBySource
     try {
-        Files.write(Paths.get("data/relationships/$id.txt"), "$source,$target,$isSourceFollowedByTarget\n".
+        Files.write(Paths.get("data/relationships/eight/$id.txt"), "$source,$target,$isSourceFollowedByTarget\n".
             toByteArray(), StandardOpenOption.APPEND)
-        Files.write(Paths.get("data/relationships/$id.txt"), "$target,$source,$isTargetFollowedBySource\n".
+        Files.write(Paths.get("data/relationships/eight/$id.txt"), "$target,$source,$isTargetFollowedBySource\n".
             toByteArray(), StandardOpenOption.APPEND)
-    } catch (e: IOException) {`
+    } catch (e: IOException) {
+
     }
     try {
         val remaining: Int? = requestResult?.rateLimitStatus?.remaining
@@ -234,9 +234,9 @@ fun retrieveUserRelationship(source: String,
 //}
 
 fun distinctValues() {
-    File("data/relationships/eight/").walk()
+    File("data/relationships/$folderName/dirty/").walk()
         .forEach {
-            if (it.toString() != "data\\relationships\\eight") {
+            if (it.toString() != "data/relationships/$folderName/dirty") {
                 val distinctValues = mutableSetOf<String>()
                 println(it)
                 it.forEachLine {
@@ -244,8 +244,8 @@ fun distinctValues() {
                 }
                 val id = it.toString()
                     .split(".")[0]
-                    .split("eight\\")[1].toLong()
-                val file = File("data/relationships/clean/$id.txt")
+                    .split("dirty/")[1].toLong()
+                val file = File("data/relationships/$folderName/clean/$id.txt")
                 file.createNewFile()
                 distinctValues.forEach {
                     try {
@@ -258,18 +258,60 @@ fun distinctValues() {
         }
 }
 
+fun generateStats() {
+    val outputFile = File("data/relationships/$folderName/stats.txt")
+    outputFile.createNewFile()
+    outputFile.appendText("id|\ttrue_count|\tfalse_count|\tnull_count|\trelationships_count|\tusers_following_origin_percentage\n")
+
+    File("data/relationships/$folderName/clean").walk()
+        .forEach {
+            if (it.toString() != "data/relationships/$folderName/clean") {
+                var lineCount = 0
+                var trueCount = 0
+                var falseCount = 0
+                var nullCount = 0
+                val id = it.toString()
+                    .split(".")[0]
+                    .split("clean/")[1]
+                it.forEachLine { r ->
+                    lineCount++
+                    val relation = r.split(",")[2]
+                    if (relation == "false") {
+                        falseCount++
+                    } else if (relation == "true") {
+                        trueCount++
+                    } else if (relation == "null") {
+                        nullCount++
+                    }
+                }
+
+                val perc = percentages.get(id.toLong())?.div(trueCount)?.times(100)
+
+                val toWrite = StringBuilder().append(id).append("|\t")
+                    .append(trueCount).append("|\t")
+                    .append(falseCount).append("|\t")
+                    .append(nullCount).append("|\t")
+                    .append(lineCount).append("|\t")
+                    .append(if (perc!!.isNaN()) "0" else String.format("%.2f", perc)).append("\n")
+                    .toString()
+                outputFile.appendText(toWrite)
+            }
+        }
+
+}
+
 fun throughFiles() {
 //    val filenames = ArrayList<File>()
 //    File("data/relationships/").walk().forEach { filenames.add(it) }
 //
 //    filenames.forEach{ it.forEachLine { println(it) }}
 
-    File("data/relationships/clean").walk()
+    File("data/relationships/$folderName/clean").walk()
         .forEach {
-            if (it.toString() != "data\\relationships\\clean") {
+            if (it.toString() != "data/relationships/$folderName/clean") {
                 val id = it.toString()
                     .split(".")[0]
-                    .split("clean\\")[1].toLong()
+                    .split("clean/")[1].toLong()
 
                 val connection = Neo4jConnection(
                     "bolt://thesis.polyzos.dev:7687",
@@ -288,12 +330,15 @@ fun throughFiles() {
                         }
 
                     val users = HashMap<String, ArrayList<String>>()
+                    val allUsersFromTweetChain = mutableSetOf<String>()
                     it.forEachLine { r ->
                         val split = r.split(",")
                         val source = split[0]
                         val target = split[1]
+                        allUsersFromTweetChain.add(source)
                         val followed = split[2]
                         if (followed == "true") {
+//                            println("Inside the statement")
                             if (users.containsKey(source)) {
                                 users[source]?.add(target)
                             } else {
@@ -307,6 +352,9 @@ fun throughFiles() {
                         .asMap()["starter"].toString()
                     val origin = results[0]
                         .asMap()["origin"].toString()
+                    val usersFollowingOriginCount = if (users[starter]?.size != null ) users[starter]!!.size.toDouble() else 0.toDouble()
+
+                    percentages.put(id, usersFollowingOriginCount)
                     val line = StringBuilder()
                         .append(starter)
                         .append(",")
@@ -321,7 +369,7 @@ fun throughFiles() {
                         }
                     }
                     line.append("]")
-                    val file = File("data/stories/eight/$id.txt")
+                    val file = File("data/relationships/$folderName/follows/$id.txt")
                     file.createNewFile()
                     try {
                         file.appendText(line.toString() + "\n")
@@ -336,11 +384,12 @@ fun throughFiles() {
                             .append(",")
                             .append(timestamp)
                             .append(",[")
+
                         users[currentUser]?.forEachIndexed { index, e ->
                             if (index + 1 != users[currentUser]?.size) {
-                                line.append(e).append(",")
+                                l.append(e).append(",")
                             } else {
-                                line.append(e)
+                                l.append(e)
                             }
                         }
                         l.append("]")
@@ -356,4 +405,47 @@ fun throughFiles() {
 
             }
         }
+}
+
+fun userAppearancesInStories() {
+    val pathToRead = "data/relationships/$folderName/follows"
+    val pathToWrite = "data/relationships/$folderName/appearances.txt"
+    val appearances = HashMap<String, MutableSet<String>>()
+
+    File(pathToRead).walk()
+        .forEach {
+            if (it.toString() != pathToRead) {
+                val id = it.toString()
+                    .split(".")[0]
+                    .split("follows/")[1]
+
+                it.forEachLine { line ->
+                    val user = line.split(",")[0]
+                    if (appearances.containsKey(user)) {
+                        appearances[user]?.add(id)
+                    } else {
+                        val tweetIDs = mutableSetOf<String>()
+                        tweetIDs.add(id)
+                        appearances.put(user, tweetIDs)
+                    }
+                }
+            }
+        }
+
+    val fileToWrite = File(pathToWrite)
+    fileToWrite.createNewFile()
+    appearances.forEach { (key, value) ->
+        if (value.size > 1) {
+            val builder = StringBuilder().append(key).append(",").append("[")
+            value.forEachIndexed { index, s ->
+                if (index + 1 == value.size) {
+                    builder.append(s)
+                } else {
+                    builder.append(s).append(",")
+                }
+            }
+            builder.append("]\n")
+            fileToWrite.appendText(builder.toString())
+        }
+    }
 }
