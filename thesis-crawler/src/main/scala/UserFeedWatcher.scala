@@ -7,7 +7,8 @@ import scala.concurrent.Await
 
 object UserFeedWatcher {
 
-  private val twitterAccounts = Seq("BreitbartNews",
+  private val twitterAccounts = Seq(
+    "BreitbartNews",
     "TheOnion",
     "politicususa",
     "TheBlaze_Prod",

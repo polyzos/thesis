@@ -67,7 +67,7 @@ class StreamListenerActor(ids: Seq[Long]) extends Actor
         if (postsCache.size > 1000) postsCache.clear()
       }
 
-      if (streamCache.size > 20) {
+      if (streamCache.size > 200) {
         saveToDisk(streamCache.toList, "fake_tweets.json")(context.system)
         streamCache.clear()
       }

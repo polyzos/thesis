@@ -1,5 +1,7 @@
+import com.univocity.parsers.annotations.Parsed
 import models.ParsedTweet
 import models.ParsedUser
+import org.apache.commons.collections.ListUtils
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.apache.spark.sql.Dataset
@@ -72,7 +74,7 @@ fun main() {
     /**
      * Find some statistics for count
      * */
-    tweetsWithRetweetCounts.describe().show()
+//    tweetsWithRetweetCounts.describe().show()
 
     // Keep tweets with more than 10 retweets
     val tweetsAboveThreshold = GraphUtils.retrieveTweetsAboveThreshold(
@@ -82,9 +84,36 @@ fun main() {
 
 //    insights(tweetsAboveThreshold, spark)
 
-    val tweetsSample = retrieveSubsetOfStories(tweetsAboveThreshold, 16)
+//    val tweetsSample = retrieveSubsetOfStories(tweetsAboveThreshold, 16)
 
-//    createGraph(tweetsSample, spark)
+    val fake = tweetsAboveThreshold.collectAsList()
+        .map { Utilities.rowToParsedTweet(it) }
+        .filter { twitterAccounts.contains(it.user_screen_name) }
+        .filter {
+            val fetchedRetweets = GraphUtils.findPostRetweets(it.id, spark)
+            fetchedRetweets.count() < 65
+        }.toList()
+
+    println(fake.count())
+    val legit = tweetsAboveThreshold.collectAsList()
+        .map { Utilities.rowToParsedTweet(it) }
+        .filter { !twitterAccounts.contains(it.user_screen_name) }
+        .filter {
+            val fetchedRetweets = GraphUtils.findPostRetweets(it.id, spark)
+            fetchedRetweets.count() < 65
+        }
+        .take(fake.count()).toList()
+
+
+    println("fake: " + fake.count())
+    println("legit: " + legit.count())
+
+    val tweetsSample = mutableListOf<ParsedTweet>()
+    fake.forEach { tweetsSample.add(it) }
+    legit.forEach { tweetsSample.add(it) }
+    println(tweetsSample.count())
+
+    createGraph(tweetsSample, spark)
 
     spark.close()
 }
