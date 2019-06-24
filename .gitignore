@@ -49,3 +49,5 @@ thesis-graph/build
 thesis-commons/out
 
 .ipynb_checkpoints
+
+static/*
