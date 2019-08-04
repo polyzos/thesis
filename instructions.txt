@@ -1,0 +1,13 @@
+Run the following on a computer with anaconda installed
+
+1. "pip show networkx"
+    if version installed is < 2.4rc1 then:
+        a. "pip uninstall networkx"
+        b. "git clone git@github.com:networkx/networkx.git"
+        c. "cd networkx"
+        d. "pip install -e ."
+
+2. "jupyter notebook"
+3. find the GraphAnalytics.ipynb file and open it
+4. run the cells sequentially
+5. you can change the tweet story from the first cell, changing the filename variable with one of the rest ids inside the folder.
