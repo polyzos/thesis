@@ -58,8 +58,6 @@ class StreamListenerActor(ids: Seq[Long]) extends Actor
 
   private def cacheTweet: PartialFunction[StreamingMessage, Unit] = {
     case tweet: Tweet =>
-      //      log.info(s"\nReceived tweet: ${tweet.text.toString}")
-
       if (tweet.retweeted_status.isDefined && !postsCache.contains(tweet.retweeted_status.get.id)) {
         val id = tweet.retweeted_status.get.id
         postsCache += id
@@ -72,7 +70,6 @@ class StreamListenerActor(ids: Seq[Long]) extends Actor
         streamCache.clear()
       }
       streamCache += tweet
-    //      retweetHandlerActor ! CheckIfNewPost(tweet)
     case _ =>
       log.info("Unknown object received from twitter stream.")
   }
