@@ -63,15 +63,3 @@ We, also, depict the relationship a user following another user with an edge tag
 ##### Example image of a network graph, showing the propagation of a tweet story.
 
 ![Example of a network graph](1133089990576095232.png)
-### 4. Graph Algorithms
------------------------   
-* TODO: Description about the graph algorithms
-
-### TODO:
----------
-1. Add logging instead to all the projects
-2. Extract variables to configuration and load the from there
-3. Add graph algorithms
-4. Add Testing
-5. Containerize the project and add bash scripts
-6. Add CI/CD
