@@ -62,4 +62,4 @@ We, also, depict the relationship a user following another user with an edge tag
 
 ##### Example image of a network graph, showing the propagation of a tweet story.
 
-![Example of a network graph](1133089990576095232.png)
+![Example of a network graph](docs/1133089990576095232.png)
